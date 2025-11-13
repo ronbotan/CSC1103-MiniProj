@@ -13,6 +13,31 @@ typedef struct Players{
     int played;
 } Players;
 
+void readName(char player[], char p);
+void trim(char *str);
+void showScores();
+void updateDraw(char *player1, char *player2);
+void updateLoserScore(char *loserName);
+void updatePlayerScore(char *winnerName);
+void saveScores(Players players[], int count);
+int readScores(Players players[], int maxPlayers);
+void updateScores(char winner, char player1[], char player2[]);
+
+void updateScores(char winner, char player1[], char player2[]) {
+    if (winner == 'O') { //Player 1 win
+        updatePlayerScore(player1);
+        updateLoserScore(player2);
+    }
+    else if (winner == 'X') {//Player 2 win
+        updatePlayerScore(player2);
+        updateLoserScore(player1);
+    }
+    else if (winner == 'D') { //DRAW
+        updateDraw(player1, player2);
+    }
+    showScores(); //Show scores after updating
+}
+
 
 // Load scores into an array of Player structs
 int readScores(Players players[], int maxPlayers) {
@@ -132,24 +157,16 @@ void showScores() {
     int count = readScores(players, 100);
 
     printf("\n🏆 Current Scoreboard 🏆\n");
-    printf("%-10s | %-5s | %-5s | %-6s\n", "Name", "Wins", "Draws", "Games");
+    printf("%-20s | %-5s | %-5s | %-6s\n", "Name", "Wins", "Draws", "Games");
     printf("-----------------------------------\n");
     for (int i = 0; i < count; i++) {
-        printf("%-10s | %-5d | %-5d | %-6d\n",
+        printf("%-20s | %-5d | %-5d | %-6d\n",
             players[i].name,
             players[i].win,
             players[i].draw,
             players[i].played);
     }
     printf("\n");
-}
-
-void readNames() {
-    static char player1[50], player2[50];
-    printf("Enter name for Player X: ");
-    fgets(player1, 50, stdin);
-    printf("Enter name for Player O: ");
-    fgets(player2, 50, stdin);
 }
 
 void trim(char *str) {
@@ -160,3 +177,19 @@ void trim(char *str) {
     for (int i = strlen(str) - 1; i >= 0 && str[i] == ' '; i--)
         str[i] = '\0';
 }
+
+void readName(char player[], char p) {
+    printf("\nEnter name for Player %c: ", p);
+    fgets(player, 20, stdin); //fgets reads the entire string, allowing full names with spaces (e.g. Ron Tan)
+    trim(player); //Run the trim function after reading using fgets to get rid of \n character
+}
+
+/*
+void readNames() {
+    static char player1[50], player2[50];
+    printf("Enter name for Player X: ");
+    fgets(player1, 50, stdin);
+    printf("Enter name for Player O: ");
+    fgets(player2, 50, stdin);
+}
+*/

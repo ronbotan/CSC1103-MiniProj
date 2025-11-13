@@ -3,14 +3,8 @@
 
 
 int main() {
-    static char player1[50], player2[50];
-    printf("\nEnter name for Player O: ");
-    fgets(player1, 50, stdin);
-    trim(player1);
-    printf("Enter name for Player X: ");
-    fgets(player2, 50, stdin);
-    trim(player2);
-
+    int mode;
+    static char player1[20], player2[20];
     //Storing of values in a char array
     char board[ROW][COLUMN] = {
         {' ', ' ', ' '},
@@ -19,69 +13,47 @@ int main() {
     };
     char* boardPtr = &board[0][0];
     
-    char player = 'O';
+    char player = 'O'; //Initialise first player as O
     int row, col, result = 0;
     char winner, loser;
 
-    printf("Tic Tac Toe\n");
-    printf("Player 1: O | Player 2: X\n\n");
+    printf("\n ⭕ ❌ Select a Mode ❌ ⭕\n");
+    printf("%-10s | %-5s\n", "Selection:", "Mode");
+    printf("-----------------------------------\n");
+    
+    printf("%-10s | %-10s\n", "1:", "2 Player 🙋 🙋");
+    printf("%-10s | %-10s\n", "2:", "1 Player Easy 🤖");
+    printf("%-10s | %-10s\n", "3:", "1 Player Normal 🤖");
+    printf("%-10s | %-10s\n", "4:", "1 Player Hard 🤖");
+    scanf("%d", &mode);
+    getchar(); //Clearing of input buffer
+    
+    switch (mode) {
+        case (1): //Run 2 player mode
+            printf("\n2 Player Mode!");
+            readName(player1, player);
+            player = (player == 'O') ? 'X' : 'O';
 
-    while (1) {
-        printBoard(board);
-        printf("Player %c, enter row and column (1-3 1-3): ", player);
-        scanf("%d %d", &row, &col);
+            readName(player2, player);
+            player = (player == 'O') ? 'X' : 'O';
 
-        //Validate input
-        if ((row<1)||(row>3)||(col<1)||(col>3)) {
-            printf("Invalid position. Try again.\n");
-            continue;
-        }
-
-        //Adjust for 0-based index
-        row--;
-        col--;
-
-        //Check if cell is empty
-        if (board[row][col] != ' ') {
-            printf("Cell already taken. Try again.\n");
-            continue;
-        }
-
-        //Make move
-        board[row][col] = player;
-
-        //Check for win
-        result = checkWin(board);
-        if (result) {
-            printBoard(board);
-            printf("Player %c wins!\n", player);
-            winner = player;
-            loser = (player=='O')?'X':'O';
+            winner = Run2P(board, boardPtr, player);
+            updateScores(winner, player1, player2);
             break;
-        } else if (checkFull(boardPtr)) { //Check for draw
-            printBoard(board);
-            printf("It's a draw!\n");
-            winner = 'D';
-            break;
-        }
-        // One line if else statement based on lecture notes
-        // If player==O is true player becomes X. Else if player==O is false, player becomes O 
-        player = (player=='O')?'X':'O'; 
         
-    }
+        case (2): //Run 1 player easy mode
+            readName(player1, player);
+            break;
+            
+        case (3): //Run 1 player normal mode (CHARMAIN TAN JIA YI)
+            break;
 
-    if (winner == 'O') { //Player 1 win
-        updatePlayerScore(player1);
-        updateLoserScore(player2);
-    }
-    else if (winner == 'X') {//Player 2 win
-        updatePlayerScore(player2);
-        updateLoserScore(player1);
-    }
-    else if (winner == 'D') { //DRAW
-        updateDraw(player1, player2);
-    }
-    showScores();
+        case (4): //Run 1 player hard mode
+            break;
+
+        default:
+            break;
+        }
     
     return 0;
 }
