@@ -6,303 +6,357 @@
 #include <string.h>
 #include <time.h>
 
-enum { EMPTY=0, X=1, O=2 };     // Define constants for each board state
+/* ---- Board symbols ---- */
+#define EMPTY ' '
+#define X     'X'
+#define O     'O'
 
 typedef enum { MODE_1P=1, MODE_2P=2 } game_mode_t;
 typedef enum { DIFF_EASY=1, DIFF_MED=2, DIFF_HARD=3 } difficulty_t;
 
-static int board[9];
-static int turn = X;
+/* 3×3 Tic Tac Toe grid */
+static char board[3][3];
 
-static int winner = 0;                  // 0 = none, 1 = X, 2 = O, 3 = draw
-static int winLine[3] = {-1,-1,-1};     // indices of the winning triplet
+static char turn = X;
+static char winner = EMPTY;   // 'X', 'O', ' ', or 'D' (draw)
+static int winLine[3] = {-1, -1, -1};
 
 static game_mode_t mode_choice = MODE_2P;
-static difficulty_t diff_choice = DIFF_EASY; // only used in 1P
-static int human = X;
-static int ai    = O;
+static difficulty_t diff_choice = DIFF_EASY;
+static char human = X;
+static char ai    = O;
 
 
-static int CheckWinner(const int *b, int *wline) {
-    static const int W[8][3] = {
-        {0,1,2},{3,4,5},{6,7,8},  // rows
-        {0,3,6},{1,4,7},{2,5,8},  // cols
-        {0,4,8},{2,4,6}           // diagonals
-    };
-    for (int i = 0; i < 8; ++i) {
-        int a=W[i][0], c=W[i][1], d=W[i][2];
-        if (b[a] != EMPTY && b[a] == b[c] && b[c] == b[d]) {
-            if (wline) { wline[0]=a; wline[1]=c; wline[2]=d; }
-            return b[a]; // X or O
+/* ---------- WIN CHECK ---------- */
+static char CheckWinner(char b[3][3], int wline[3])
+{
+    // Check rows
+    for (int r = 0; r < 3; r++) {
+        if (b[r][0] != ' ' && b[r][0] == b[r][1] && b[r][1] == b[r][2]) {
+            if (wline) { wline[0] = r*3+0; wline[1] = r*3+1; wline[2] = r*3+2; }
+            return b[r][0];  // 'X' or 'O'
         }
     }
-    // any empty? then still playing
-    for (int i=0;i<9;i++) if (b[i]==EMPTY) return 0;
-    return 3; // draw
+
+    // Check columns
+    for (int c = 0; c < 3; c++) {
+        if (b[0][c] != ' ' && b[0][c] == b[1][c] && b[1][c] == b[2][c]) {
+            if (wline) { wline[0] = 0*3+c; wline[1] = 1*3+c; wline[2] = 2*3+c; }
+            return b[0][c];
+        }
+    }
+
+    // Check main diagonal
+    if (b[1][1] != ' ' && b[0][0] == b[1][1] && b[1][1] == b[2][2]) {
+        if (wline) { wline[0] = 0; wline[1] = 4; wline[2] = 8; }
+        return b[1][1];
+    }
+
+    // Check anti-diagonal
+    if (b[1][1] != ' ' && b[0][2] == b[1][1] && b[1][1] == b[2][0]) {
+        if (wline) { wline[0] = 2; wline[1] = 4; wline[2] = 6; }
+        return b[1][1];
+    }
+
+    // Check for draw
+    for (int r = 0; r < 3; r++)
+        for (int c = 0; c < 3; c++)
+            if (b[r][c] == ' ')
+                return ' ';  // game still in progress
+
+    return 'D';  // draw
 }
 
 
 
-void draw(FILE *gp) {
-    // clear previous objects/arrows
+/* ---------- DRAW USING GNUPLOT ---------- */
+void draw(FILE *gp, char board[3][3])
+{
     fprintf(gp, "unset object\n");
     fprintf(gp, "unset arrow\n");
 
-    // canvas and grid
     fprintf(gp,
-        "unset key;"                                            // no legend
-        "set size square;"                                      // square aspect ratio
-        "set xrange [0:3];"                                     // x from 0 to 3
-        "set yrange [0:3];"                                     // y from 0 to 3
-        "unset xtics;"                                          // no x ticks
-        "unset ytics;"                                          // no y ticks
-        "unset border;"                                         // no border
+        "unset key;"
+        "set size square;"
+        "set xrange [0:3];"
+        "set yrange [0:3];"
+        "unset xtics;"
+        "unset ytics;"
+        "unset border;"
         "set style line 1 lc rgb 0x000000 lw 3;\n"
         "set arrow from 1,0 to 1,3 nohead ls 1;\n"
         "set arrow from 2,0 to 2,3 nohead ls 1;\n"
         "set arrow from 0,1 to 3,1 nohead ls 1;\n"
         "set arrow from 0,2 to 3,2 nohead ls 1;\n"
-    );                  
+    );
 
-    // add objects for X and O
-    for (int i = 0; i < 9; ++i) {
-        int r = i/3; 
+    /* draw X and O */
+    for (int i = 0; i < 9; i++) {
+        int r = i/3;
         int c = i%3;
-        double x = c + 0.5; 
+        double x = c + 0.5;
         double y = r + 0.5;
 
-        // draw X
-        if (board[i] == X) {
-            // two thick diagonal arrows for X
-            fprintf(gp, "set arrow from %f-0.30,%f-0.30 to %f+0.30,%f+0.30 nohead lw 6 lc rgb 0xFF0000\n", x,y,x,y);
-            fprintf(gp, "set arrow from %f-0.30,%f+0.30 to %f+0.30,%f-0.30 nohead lw 6 lc rgb 0xFF0000\n", x,y,x,y);
-        // draw O
-        } else if (board[i] == O) {
-            fprintf(gp, "set object circle at %f,%f size 0.30 front fs empty border lc rgb 0x0000FF lw 6\n", x, y);
+        if (board[r][c] == X) {
+            fprintf(gp, "set arrow from %f-0.3,%f-0.3 to %f+0.3,%f+0.3 nohead lw 6 lc rgb 0xFF0000\n", x,y,x,y);
+            fprintf(gp, "set arrow from %f-0.3,%f+0.3 to %f+0.3,%f-0.3 nohead lw 6 lc rgb 0xFF0000\n", x,y,x,y);
+        }
+        else if (board[r][c] == O) {
+            fprintf(gp,
+                "set object circle at %f,%f size 0.30 front fs empty "
+                "border lc rgb 0x0000FF lw 6\n", x,y);
         }
     }
 
-    // if there is a winner, draw a gold line across the winning triplet
+    /* Winning line */
     if (winner == X || winner == O) {
         int a = winLine[0], b = winLine[2];
-        int ar = a/3, ac = a%3;
-        int br = b/3, bc = b%3;
+        int ar=a/3, ac=a%3;
+        int br=b/3, bc=b%3;
 
         double x1 = ac + 0.5, y1 = ar + 0.5;
         double x2 = bc + 0.5, y2 = br + 0.5;
 
-        // small extension so the line touches the glyph edges nicely
         double dx = x2 - x1, dy = y2 - y1;
-        double len = (dx*dx + dy*dy) > 0 ? sqrt(dx*dx + dy*dy) : 1.0;
+        double len = sqrt(dx*dx + dy*dy);
         dx /= len; dy /= len;
-        double extend = 0.35; // tweak if you want longer/shorter
 
-        x1 -= dx * extend; y1 -= dy * extend;
-        x2 += dx * extend; y2 += dy * extend;
+        x1 -= dx * 0.35;
+        x2 += dx * 0.35;
+        y1 -= dy * 0.35;
+        y2 += dy * 0.35;
 
-        fprintf(gp, "set arrow from %f,%f to %f,%f lw 8 lc rgb 0x00FF00 nohead front\n", x1,y1,x2,y2);
+        fprintf(gp,
+            "set arrow from %f,%f to %f,%f lw 8 lc rgb 0x00FF00 nohead front\n",
+            x1,y1,x2,y2);
     }
 
-    // one plot to render everything
     fprintf(gp, "plot NaN notitle\n");
     fflush(gp);
 }
 
-static void reset_board(void) {
-    for (int i=0;i<9;i++) board[i]=EMPTY;
-    winner = 0;
-    winLine[0]=winLine[1]=winLine[2]=-1;
+
+/* ---------- Utility ---------- */
+static void reset_board(void)
+{
+    for (int r=0; r<3; r++)
+        for (int c=0; c<3; c++)
+            board[r][c] = EMPTY;
+
+    winner = EMPTY;
+    winLine[0]=winLine[1]=winLine[2] = -1;
     turn = X;
 }
 
-static int next_turn(int t) { return (t==X) ? O : X; }
+static char next_turn(char t) { return (t==X) ? O : X; }
 
-static int empty_count(const int *b) {
-    int n=0; for (int i=0;i<9;i++) if (b[i]==EMPTY) n++; return n;
-}
 
-static void list_empty(const int *b, int *idxs, int *n) {
-    int k=0; for (int i=0;i<9;i++) if (b[i]==EMPTY) idxs[k++]=i; *n=k;
-}
-
-/* ---------- AI helpers ---------- */
-static int find_winning_move(int who) {
-    // try each empty; if placing 'who' wins immediately, return it
-    for (int i=0;i<9;i++) if (board[i]==EMPTY) {
-        board[i]=who;
-        int w = CheckWinner(board, NULL);
-        board[i]=EMPTY;
-        if (w==who) return i;
+/* ---------- AI Helpers ---------- */
+static int find_winning_move(char who)
+{
+    for (int i=0; i<9; i++) {
+        int r=i/3, c=i%3;
+        if (board[r][c] != EMPTY) continue;
+        board[r][c] = who;
+        char w = CheckWinner(board, NULL);
+        board[r][c] = EMPTY;
+        if (w == who) return i;
     }
     return -1;
 }
 
-static int random_move(void) {
-    int idxs[9], n;
-    list_empty(board, idxs, &n);
+static int random_move(void)
+{
+    int list[9], n=0;
+    for (int i=0;i<9;i++)
+        if (board[i/3][i%3] == EMPTY)
+            list[n++] = i;
     if (n==0) return -1;
-    return idxs[rand()%n];
+    return list[rand()%n];
 }
 
-/* Minimax (perfect play) — AI is 'ai'; human is 'human' */
-static int minimax_score(int player) {
-    int w = CheckWinner(board, NULL);
-    if (w==ai)    return +10;
-    if (w==human) return -10;
-    if (w==3)     return 0;
 
-    int best = (player==ai) ? -1000 : 1000;
+/* ---------- Minimax ---------- */
+static int minimax_score(char player)
+{
+    char w = CheckWinner(board, NULL);
+    if (w == ai) return +10;
+    if (w == human) return -10;
+    if (w == 'D') return 0;
 
-    for (int i=0;i<9;i++) if (board[i]==EMPTY) {
-        board[i]=player;
+    int best = (player == ai ? -1000 : 1000);
+
+    for (int i=0; i<9; i++) {
+        int r=i/3, c=i%3;
+        if (board[r][c] != EMPTY) continue;
+
+        board[r][c] = player;
         int sc = minimax_score(next_turn(player));
-        board[i]=EMPTY;
-        if (player==ai) {
-            if (sc>best) best=sc;
+        board[r][c] = EMPTY;
+
+        if (player == ai) {
+            if (sc > best) best = sc;
         } else {
-            if (sc<best) best=sc;
+            if (sc < best) best = sc;
         }
     }
     return best;
 }
 
-static int best_minimax_move(void) {
-    int bestMove = -1;
+static int best_minimax_move(void)
+{
     int bestScore = -1000;
-    for (int i=0;i<9;i++) if (board[i]==EMPTY) {
-        board[i]=ai;
+    int move = -1;
+
+    for (int i=0; i<9; i++) {
+        int r=i/3, c=i%3;
+        if (board[r][c] != EMPTY) continue;
+
+        board[r][c] = ai;
         int sc = minimax_score(human);
-        board[i]=EMPTY;
-        if (sc>bestScore) { bestScore=sc; bestMove=i; }
+        board[r][c] = EMPTY;
+
+        if (sc > bestScore) {
+            bestScore = sc;
+            move = i;
+        }
     }
-    return bestMove;
+    return move;
 }
 
-static int ai_pick_move(void) {
-    if (diff_choice == DIFF_EASY) {
+static int ai_pick_move(void)
+{
+    if (diff_choice == DIFF_EASY)
         return random_move();
-    } else if (diff_choice == DIFF_MED) {
+
+    if (diff_choice == DIFF_MED) {
         int m = find_winning_move(ai);
-        if (m!=-1) return m;
+        if (m != -1) return m;
         m = find_winning_move(human);
-        if (m!=-1) return m;
+        if (m != -1) return m;
         return random_move();
-    } else { // DIFF_HARD
-        // small optimization: win/block first, else minimax
-        int m = find_winning_move(ai);
-        if (m!=-1) return m;
-        m = find_winning_move(human);
-        if (m!=-1) return m;
-        return best_minimax_move();
     }
+
+    /* Hard */
+    int m = find_winning_move(ai);
+    if (m!=-1) return m;
+    m = find_winning_move(human);
+    if (m!=-1) return m;
+    return best_minimax_move();
 }
+
 
 /* ---------- Menu ---------- */
-static long read_long_choice(const char *prompt, long lo, long hi) {
+static long read_long_choice(const char *p, long lo, long hi)
+{
     char buf[64];
     while (1) {
-        if (prompt && *prompt) fputs(prompt, stdout);
-        if (!fgets(buf, sizeof(buf), stdin)) return lo;
-        char *p=buf; while (*p && isspace((unsigned char)*p)) p++;
-        char *end=NULL; long v = strtol(p,&end,10);
-        if (end!=p && v>=lo && v<=hi) return v;
-        printf("Please enter a number between %ld and %ld.\n", lo, hi);
+        if (p) fputs(p, stdout);
+        if (!fgets(buf, 64, stdin)) return lo;
+        long v = strtol(buf, NULL, 10);
+        if (v >= lo && v <= hi) return v;
+        printf("Please enter %ld–%ld.\n", lo, hi);
     }
 }
 
-static void show_menu(void) {
-    printf("=== Tic-Tac-Toe ===\n");
-    printf("1) 1 Player (you are X)\n");
+static void show_menu(void)
+{
+    printf("=== Tic Tac Toe ===\n");
+    printf("1) 1 Player\n");
     printf("2) 2 Players\n");
-    long m = read_long_choice("Select mode: ", 1, 2);
-    mode_choice = (m==1) ? MODE_1P : MODE_2P;
+
+    mode_choice = read_long_choice("Choose: ",1,2);
 
     if (mode_choice == MODE_1P) {
-        printf("\nSelect difficulty:\n");
-        printf("1) Easy (random)\n");
-        printf("2) Medium (win/block/random)\n");
-        printf("3) Hard (minimax)\n");
-        long d = read_long_choice("Difficulty: ", 1, 3);
-        diff_choice = (difficulty_t)d;
-        human = X; ai = O; // human starts by default
-        printf("\nYou are X. Enter 1-9 to play.\n\n");
-    } else {
-        printf("\n2-Player mode: X goes first. Enter 1-9 to play.\n\n");
+        printf("\nDifficulty:\n");
+        printf("1) Easy\n");
+        printf("2) Medium\n");
+        printf("3) Hard\n");
+        diff_choice = read_long_choice("Choose: ",1,3);
+        human = X;
+        ai = O;
     }
+
+    printf("\nX goes first. Enter 1 to 9.\n\n");
 }
 
-int poop(void) {
+
+/* ---------- MAIN ---------- */
+int poop(void)
+{
     srand((unsigned)time(NULL));
-    // open a pipe and keep the window open even after the program ends
+
     FILE *gp = _popen("gnuplot -persist", "w");
     if (!gp) {
-        printf("Could not open gnuplot.\n");
+        printf("Failed to open gnuplot\n");
         return 1;
     }
+
     show_menu();
     reset_board();
-    // draw initial empty board
-    draw(gp);
-    printf("Enter position (1-9):\n");
+    draw(gp, board);
 
     char buf[64];
-    while (fgets(buf, sizeof(buf), stdin)) {
-        // handle quit
-        char *p=buf; while (*p && isspace((unsigned char)*p)) p++;
+
+    while (fgets(buf, 64, stdin)) {
+
+        char *p = buf;
+        while (*p==' '||*p=='\t') p++;
         if (*p=='q' || *p=='Q') break;
 
-        // If it's AI's turn (1P) — play automatically
+        /* AI MOVE */
         if (mode_choice==MODE_1P && turn==ai) {
-            int m = ai_pick_move();
-            if (m>=0) {
-                board[m]=ai;
-                winner = CheckWinner(board, winLine);
-                draw(gp);
-                if (winner!=0) {
-                    if (winner==3) printf("Draw!\n");
-                    else printf("%s wins!\n", winner==X?"X":"O");
-                    break;
-                }
-                turn = next_turn(turn);
-                // fall through to prompt human
-            } else {
-                // no move (shouldn’t happen unless game over)
+            int mv = ai_pick_move();
+            if (mv >= 0) {
+                int r=mv/3, c=mv%3;
+                board[r][c] = ai;
             }
-            printf("Enter position (1-9), or 'q' to quit.\n");
+            winner = CheckWinner(board, winLine);
+            draw(gp, board);
+            if (winner!=' ') {
+                if (winner=='D') printf("Draw!\n");
+                else printf("%c wins!\n", winner);
+                break;
+            }
+            turn = next_turn(turn);
+            printf("Enter move (1–9): ");
             continue;
         }
 
-        // Human / current player input
-        char *end=NULL; long v=strtol(p,&end,10);
-        if (end==p || v<1 || v>9) {
-            printf("Please enter 1-9 (or q to quit):\n");
-            continue;
-        }
-        int cell=(int)v-1;
-
-        if (board[cell]!=EMPTY) {
-            printf("Cell already filled. Try another.\n");
+        /* HUMAN MOVE */
+        long v = strtol(p,NULL,10);
+        if (v < 1 || v > 9) {
+            printf("Enter 1–9 or q.\n");
             continue;
         }
 
-        board[cell]=turn;
+        int idx = (int)v - 1;
+        int r = idx/3, c = idx%3;
+
+        if (board[r][c] != EMPTY) {
+            printf("Cell filled. Try again.\n");
+            continue;
+        }
+
+        board[r][c] = turn;
+
         winner = CheckWinner(board, winLine);
-        draw(gp);
-        if (winner!=0) {
-            if (winner==3) printf("Draw!\n");
-            else printf("%s wins!\n", winner==X?"X":"O");
+        draw(gp, board);
+        if (winner!=' ') {
+            if (winner=='D') printf("Draw!\n");
+            else printf("%c wins!\n", winner);
             break;
         }
 
         turn = next_turn(turn);
 
-        // If AI should move next, loop will auto-handle at top
-        if (mode_choice==MODE_2P || (mode_choice==MODE_1P && turn==human)) {
-            printf("Enter position (1-9), or 'q' to quit.\n");
+        if (mode_choice==MODE_2P ||
+            (mode_choice==MODE_1P && turn==human))
+        {
+            printf("Enter move (1 to 9): ");
         }
     }
 
-    // close pipe
     _pclose(gp);
     return 0;
 }

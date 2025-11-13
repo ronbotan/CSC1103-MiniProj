@@ -47,7 +47,7 @@ char Run2P(char board[][3], char* boardPtr, char player)
     //----------------------------------------------
     while (1)
     {
-        draw(gp);
+        draw(gp, board);
         printf("Player %c, enter row and column (1-3 1-3): ", player);
         scanf("%d %d", &row, &col);
 
@@ -71,12 +71,12 @@ char Run2P(char board[][3], char* boardPtr, char player)
 
         // Make move
         board[row][col] = player;
-
+        draw(gp, board);
         // Check for win
         result = checkWin(board);
         if (result)
         {
-            draw(gp);
+            draw(gp, board);
             printf("Player %c wins!\n", player);
             winner = player;
             loser = (player == 'O') ? 'X' : 'O';
@@ -84,7 +84,7 @@ char Run2P(char board[][3], char* boardPtr, char player)
         }
         else if (checkFull(boardPtr))
         { // Check for draw
-            draw(gp);
+            draw(gp, board);
             printf("It's a draw!\n");
             winner = 'D';
             break;
