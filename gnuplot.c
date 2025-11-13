@@ -231,7 +231,7 @@ static void show_menu(void) {
     }
 }
 
-int main(void) {
+int poop(void) {
     srand((unsigned)time(NULL));
     // open a pipe and keep the window open even after the program ends
     FILE *gp = _popen("gnuplot -persist", "w");

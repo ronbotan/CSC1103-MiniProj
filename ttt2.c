@@ -83,9 +83,7 @@ int hasEmpty(char b[3][3]) {
    3 = Draw (no winner)
 */
 int whoWins(char b[3][3]) {
-
     for (int i=0;i<3;i++) {
-
         // Check each row
         if (b[i][0]==b[i][1] && b[i][1]==b[i][2]) {
             if (b[i][0]==HUMAN) {
@@ -95,7 +93,6 @@ int whoWins(char b[3][3]) {
                 return 2;
             }
         }
-
         // Check each column
         if (b[0][i]==b[1][i] && b[1][i]==b[2][i]) {
             if (b[0][i]==HUMAN) {
@@ -106,7 +103,6 @@ int whoWins(char b[3][3]) {
             }
         }
     }
-
     // Check diagonal (top left to bottom right)
     if (b[0][0]==b[1][1] && b[1][1]==b[2][2]) {
         if (b[0][0]==HUMAN) {
@@ -116,7 +112,6 @@ int whoWins(char b[3][3]) {
             return 2;
         }
     }
-
     // Check diagonal (top right to bottom left)
     if (b[0][2]==b[1][1] && b[1][1]==b[2][0]) {
         if (b[0][2]==HUMAN) {
@@ -126,7 +121,6 @@ int whoWins(char b[3][3]) {
             return 2;
         }
     }
-
     // No winner yet
     return 0;   
 }
@@ -155,12 +149,11 @@ int minimaxLogic(char b[3][3], int isAITurn) {
                     b[r][c] = AI;                         // temporarily put AI on the empty spot
                     int result = minimaxLogic(b, 0);      // see what happens if AI move to empty spot, then player move next, then AI again
                     b[r][c] = temp;                       // put back the value
-                        
+                    
                     // AI can win
                     if (result == 2) {
                         return 2;
                     }      
-
                     // Draw possible
                     if (result == 3) {
                         foundDraw = 1;
@@ -179,7 +172,6 @@ int minimaxLogic(char b[3][3], int isAITurn) {
             return 1;   
         }
     } 
-    
     // Human turn
     else { 
         int foundDraw = 0;
@@ -207,7 +199,6 @@ int minimaxLogic(char b[3][3], int isAITurn) {
         if (foundDraw ==  1) {
             return 3;   
         } 
-
         // when not a draw (someone wins)
         else {
             return 2;   
@@ -220,7 +211,6 @@ void humanTurn(char b[3][3]) {
     int choice;
     while (1) {
         printf("Enter your move (1-9): ");
-
         // Check if input number is between 1-9
         if (scanf("%d", &choice) != 1 || choice < 1 || choice > 9) {
             printf("Invalid input!\n");
@@ -266,7 +256,6 @@ void aiTurn(char b[3][3], int mode) {
                     }
                 }
             }
-
             // break outer loop once move found
             if (bestRow != -1) {
                 break;
@@ -289,14 +278,12 @@ void aiTurn(char b[3][3], int mode) {
                         bestRow = r; bestCol = c;
                         break;
                     } 
-                    
                     else if (outcome == 3 && bestRow == -1) {
                         // Save draw move only if no losing one found yet
                         bestRow = r; bestCol = c;
                     }
                 }
             }
-
             // break outer loop once chosen
             if (bestRow != -1) {
                 break;
@@ -315,7 +302,6 @@ void aiTurn(char b[3][3], int mode) {
                     // exit both loops
                     r = c = 3; 
                 }
-
     b[bestRow][bestCol] = AI;
 }
 
@@ -327,16 +313,13 @@ int checkState(char b[3][3]) {
     if (w == 1) {
         return 1;
     }
-
     // AI win
     if (w == 2) {
         return 2;
     }
-
     // Draw
     if (!hasEmpty(b)) {
         return 3;
     }
-
     return 0;
 }

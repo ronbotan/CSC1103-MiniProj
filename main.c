@@ -17,28 +17,28 @@ int main() {
     int row, col, result = 0;
     char winner, loser;
 
-    printf("\n ⭕ ❌ Select a Mode ❌ ⭕\n");
-    printf("%-10s | %-5s\n", "Selection:", "Mode");
-    printf("-----------------------------------\n");
-    
-    printf("%-10s | %-10s\n", "1:", "2 Player 🙋 🙋");
-    printf("%-10s | %-10s\n", "2:", "1 Player Easy 🤖");
-    printf("%-10s | %-10s\n", "3:", "1 Player Normal 🤖");
-    printf("%-10s | %-10s\n", "4:", "1 Player Hard 🤖");
-    scanf("%d", &mode);
-    getchar(); //Clearing of input buffer
+    do
+    {
+        printf("\n ⭕ ❌ Select a Mode ❌ ⭕\n");
+        printf("%-10s | %-5s\n", "Selection:", "Mode");
+        printf("-----------------------------------\n");
+        printf("%-10s | %-10s\n", "1:", "2 Player 🙋 🙋");
+        printf("%-10s | %-10s\n", "2:", "1 Player Easy 🤖");
+        printf("%-10s | %-10s\n", "3:", "1 Player Normal 🤖");
+        printf("%-10s | %-10s\n", "4:", "1 Player Hard 🤖");
+        printf("Selection: ");
+        scanf("%d", &mode);
+        getchar(); //Clearing of input buffer
+        /* code */
+    } while ((mode<1) || (mode>4));
     
     switch (mode) {
         case (1): //Run 2 player mode
             printf("\n2 Player Mode!");
-            readName(player1, player);
-            player = (player == 'O') ? 'X' : 'O';
-
-            readName(player2, player);
-            player = (player == 'O') ? 'X' : 'O';
-
-            winner = Run2P(board, boardPtr, player);
-            updateScores(winner, player1, player2);
+            readName(player1, 'O'); //Assign player 1 as O
+            readName(player2, 'X'); //Assign player 2 as X
+            winner = Run2P(board, boardPtr, player); //Run 2 player game and return the winner as X or O
+            updateScores(winner, player1, player2); //Update the scoreboard for the winner. O = P1, X = P2, D = DRAW
             break;
         
         case (2): //Run 1 player easy mode
@@ -46,12 +46,11 @@ int main() {
             break;
             
         case (3): //Run 1 player normal mode (CHARMAIN TAN JIA YI)
+            readName(player1, player);
             break;
 
         case (4): //Run 1 player hard mode
-            break;
-
-        default:
+            readName(player1, player);
             break;
         }
     

@@ -1,8 +1,20 @@
-#include "gnuplot.c"
 #include <stdio.h>
 
 #define ROW 3
 #define COLUMN 3
+
+void printBoard(char board[ROW][COLUMN]) {
+    printf("\n");
+    for (int i = 0; i < ROW; i++) {
+        for (int j = 0; j < COLUMN; j++) {
+            printf(" %c ", board[i][j]);
+            if (j < COLUMN - 1) printf("|");
+        }
+        printf("\n");
+        if (i < ROW - 1) printf("---+---+---\n");
+    }
+    printf("\n");
+}
 
 //Pass by value, 2D Array values passed from main to sub-function to check for winners
 int checkWin(char board[ROW][COLUMN]) {
@@ -36,18 +48,10 @@ char Run2P(char board[][3], char* boardPtr, char player)
 {
     char winner, loser;
     int row, col, result;
-    srand((unsigned)time(NULL));
-    //----------------------------------------------
-    // open a pipe and keep the window open even after the program ends
-    FILE *gp = _popen("gnuplot -persist", "w");
-    if (!gp) {
-        printf("Could not open gnuplot.\n");
-        return 1;
-    }
-    //----------------------------------------------
+
     while (1)
     {
-        draw(gp);
+        printBoard(board);
         printf("Player %c, enter row and column (1-3 1-3): ", player);
         scanf("%d %d", &row, &col);
 
@@ -76,7 +80,7 @@ char Run2P(char board[][3], char* boardPtr, char player)
         result = checkWin(board);
         if (result)
         {
-            draw(gp);
+            printBoard(board);
             printf("Player %c wins!\n", player);
             winner = player;
             loser = (player == 'O') ? 'X' : 'O';
@@ -84,7 +88,7 @@ char Run2P(char board[][3], char* boardPtr, char player)
         }
         else if (checkFull(boardPtr))
         { // Check for draw
-            draw(gp);
+            printBoard(board);
             printf("It's a draw!\n");
             winner = 'D';
             break;
@@ -93,6 +97,5 @@ char Run2P(char board[][3], char* boardPtr, char player)
         // If player==O is true player becomes X. Else if player==O is false, player becomes O
         player = (player == 'O') ? 'X' : 'O';
     }
-    _pclose(gp);
     return winner;
 }
