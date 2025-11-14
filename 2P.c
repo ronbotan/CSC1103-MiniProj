@@ -32,10 +32,9 @@ int checkFull(char* charPtr) {
 }
 
 
-char Run2P(char board[][3], char* boardPtr, char player)
-{
+char Run2P(char board[][3], char* boardPtr, char player){
     char winner, loser;
-    int row, col, result;
+    int input, row, col, result;
     srand((unsigned)time(NULL));
     //----------------------------------------------
     // open a pipe and keep the window open even after the program ends
@@ -47,47 +46,44 @@ char Run2P(char board[][3], char* boardPtr, char player)
     //----------------------------------------------
     while (1)
     {
-        draw(gp, board);
-        printf("Player %c, enter row and column (1-3 1-3): ", player);
-        scanf("%d %d", &row, &col);
+        draw(gp, board, winner);
+        fflush(stdin);
+        printf("\nPlayer %c, select a box (1-9): ", player);
+        scanf("%d", &input);
 
         // Validate input
-        if ((row < 1) || (row > 3) || (col < 1) || (col > 3))
-        {
+        if ((input < 1) || (input > 9)) {
             printf("Invalid position. Try again.\n");
             continue;
         }
 
         // Adjust for 0-based index
-        row--;
-        col--;
+        row = (input - 1) / 3;
+        col = (input - 1) % 3;
 
         // Check if cell is empty
-        if (board[row][col] != ' ')
-        {
+        if (board[row][col] != ' ') {
             printf("Cell already taken. Try again.\n");
             continue;
         }
 
         // Make move
         board[row][col] = player;
-        draw(gp, board);
+        draw(gp, board, winner);
 
         // Check for win
         result = checkWin(board);
-        if (result)
-        {
-            draw(gp, board);
+        if (result){
             printf("Player %c wins!\n", player);
             winner = player;
+            draw(gp, board, winner);
             loser = (player == 'O') ? 'X' : 'O';
             break;
         }
-        else if (checkFull(boardPtr))
-        { // Check for draw
-            draw(gp, board);
+        else if (checkFull(boardPtr)) { // Check for draw
             printf("It's a draw!\n");
             winner = 'D';
+            draw(gp, board, winner);
             break;
         }
         // One line if else statement based on lecture notes

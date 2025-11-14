@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define HUMAN 'X'
-#define AI 'O'
+#define HUMAN 'O'
+#define AI 'X'
 
 void showBoard(char b[3][3]);
 int hasEmpty(char b[3][3]);
