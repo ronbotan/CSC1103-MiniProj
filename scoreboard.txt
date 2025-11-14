@@ -5,5 +5,5 @@ Charmain 1 0 2
 shaun 7 0 7
 ron 0 0 7
 Charman 0 0 1
-R 4 0 5
-S 1 0 5
+R 7 0 9
+S 2 0 9

@@ -20,33 +20,41 @@ char checkWinningLine(char b[3][3], int winline[3])
     // Check rows. If first value of row is not blank, check if all 3 are the same
     for (int r = 0; r < 3; r++) {
         if (b[r][0] != ' ' && b[r][0] == b[r][1] && b[r][1] == b[r][2]) {
+            winner = b[r][0];
             winline[0] = (r*3+0);
             winline[1] = (r*3+1);
             winline[2] = (r*3+2);
+            return winner;
         }
     }
 
     // Check columns. If first value of column is not blank, check if all 3 are the same
     for (int c = 0; c < 3; c++) {
         if (b[0][c] != ' ' && b[0][c] == b[1][c] && b[1][c] == b[2][c]) {
+            winner = b[0][c];
             winline[0] = (0*3+c);
             winline[1] = (1*3+c);
             winline[2] = (2*3+c);
+            return winner;
         }
     }
 
     // Check topleft to bottomright diagonal
     if (b[1][1] != ' ' && b[0][0] == b[1][1] && b[1][1] == b[2][2]) {
+        winner = b[1][1];
         winline[0] = 0;
         winline[1] = 4;
         winline[2] = 8;
+        return winner;
     }
 
     // Check topright to bottomleft diagonal
     if ((b[1][1] != ' ') && (b[0][2] == b[1][1] == b[2][0])) {
+        winner = b[1][1];
         winline[0] = 2; 
         winline[1] = 4; 
         winline[2] = 6;
+        return winner;
     }
 
     // Check for draw
@@ -96,8 +104,8 @@ void draw(FILE *gp, char board[3][3], char winner)
     }
 
     /* Winning line */
+    winner = checkWinningLine(board, winLine);
     if (winner == 'X' || winner == 'O') {
-        winLine[3] = checkWinningLine(board, winLine);
         int a = winLine[0], b = winLine[2]; //Assign A and B as the 2 points for the line. Then draw the line from A to B
         int ar=a/3, ac=a%3;
         int br=b/3, bc=b%3;
