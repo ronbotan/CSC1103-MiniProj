@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe Dataset Viewer</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 2rem;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        .upload-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 1.5rem;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            background-color: #fafafa;
+        }
+        #csvFileInput {
+            font-size: 1rem;
+        }
+        #duplicate-info {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 5px;
+            display: none; /* Hidden by default */
+        }
+        #duplicate-info.success {
+            background-color: #e8f5e9; /* Light green */
+            border: 1px solid #4caf50;
+            color: #2e7d32;
+        }
+        #duplicate-info.warning {
+            background-color: #fff3e0; /* Light orange */
+            border: 1px solid #ff9800;
+            color: #e65100;
+        }
+        #duplicate-info ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        #duplicate-info li {
+            font-family: "Courier New", Courier, monospace;
+            margin-bottom: 0.5rem;
+        }
+        #highlight-control { margin-top: 10px; }
+        #searchInput {
+            width: 100%;
+            padding: 10px 15px;
+            margin-bottom: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        thead th {
+            background-color: #3498db;
+            color: white;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+        thead th.sort-asc::after { content: ' ▲'; }
+        thead th.sort-desc::after { content: ' ▼'; }
+        tbody tr:nth-of-type(even) { background-color: #f9f9f9; }
+        tbody tr:hover { background-color: #ecf0f1; }
+        tbody tr.duplicate-row { background-color: #ffebee !important; } /* Highlight color */
+        #initialMessage { color: #888; text-align: center; font-size: 1.1rem; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Tic-Tac-Toe Optimal Moves Dataset</h1>
+
+        <div class="upload-section">
+            <label for="csvFileInput" style="margin-bottom: 1rem; font-size: 1.2rem;">Select your <code>bestmoves.csv</code> file:</label>
+            <input type="file" id="csvFileInput" accept=".csv">
+        </div>
+        
+        <div id="duplicate-info"></div>
+
+        <input type="text" id="searchInput" placeholder="Filter board states..." style="display: none;">
+        
+        <div id="table-container">
+            <p id="initialMessage">Please select a file to view the dataset.</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const fileInput = document.getElementById('csvFileInput');
+            const searchInput = document.getElementById('searchInput');
+            const tableContainer = document.getElementById('table-container');
+            const duplicateInfoDiv = document.getElementById('duplicate-info');
+            
+            let fullData = [];
+            let duplicateKeys = new Set();
+            let currentlyDisplayedData = [];
+
+            fileInput.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        fullData = parseCSV(e.target.result);
+                        currentlyDisplayedData = [...fullData];
+                        
+                        // Check for duplicates
+                        const duplicateReport = findDuplicates(fullData);
+                        displayDuplicateReport(duplicateReport);
+                        
+                        renderTable(currentlyDisplayedData);
+                        searchInput.style.display = 'block';
+                        searchInput.placeholder = `Filter through ${fullData.length} rows...`;
+                    } catch (error) {
+                        tableContainer.innerHTML = `<p style="color: red; text-align: center;">Error parsing CSV: ${error.message}</p>`;
+                        searchInput.style.display = 'none';
+                    }
+                };
+                reader.readAsText(file);
+            });
+
+            function parseCSV(text) {
+                const lines = text.trim().split('\n');
+                const headers = lines[0].split(',').map(h => h.trim());
+                if (headers.length < 10) throw new Error("CSV must have at least 10 columns.");
+                return lines.slice(1).map(line => {
+                    const values = line.split(',').map(v => v.trim());
+                    let row = {};
+                    headers.forEach((header, index) => { row[header] = values[index]; });
+                    return row;
+                });
+            }
+
+            // Function to find duplicate board states
+            function findDuplicates(data) {
+                const seen = new Map();
+                const duplicates = new Map();
+                
+                data.forEach((row, index) => {
+                    const key = Object.values(row).slice(0, 9).join(',');
+                    const lineNumber = index + 2; // CSV is 1-indexed with a header
+
+                    if (seen.has(key)) {
+                        if (!duplicates.has(key)) {
+                            duplicates.set(key, [seen.get(key)]);
+                        }
+                        duplicates.get(key).push(lineNumber);
+                    } else {
+                        seen.set(key, lineNumber);
+                    }
+                });
+                return duplicates;
+            }
+
+            // Function to display the results of the duplicate check
+            function displayDuplicateReport(duplicates) {
+                duplicateKeys = new Set(duplicates.keys());
+                duplicateInfoDiv.style.display = 'block';
+
+                if (duplicates.size === 0) {
+                    duplicateInfoDiv.className = 'success';
+                    duplicateInfoDiv.innerHTML = '✅ <strong>Analysis Complete:</strong> No duplicate board states found.';
+                    return;
+                }
+
+                duplicateInfoDiv.className = 'warning';
+                let html = `<h4>⚠️ Analysis Complete: Found ${duplicates.size} duplicate board state(s).</h4>`;
+                html += `<div id="highlight-control"><input type="checkbox" id="highlightCheckbox"> <label for="highlightCheckbox">Highlight duplicate rows in the table</label></div>`;
+                html += '<ul>';
+                duplicates.forEach((lines, key) => {
+                    html += `<li><strong>Board [${key}]</strong> found on lines: ${lines.join(', ')}</li>`;
+                });
+                html += '</ul>';
+                duplicateInfoDiv.innerHTML = html;
+
+                // Add event listener to the new checkbox
+                document.getElementById('highlightCheckbox').addEventListener('change', () => {
+                    renderTable(currentlyDisplayedData);
+                });
+            }
+
+            function renderTable(data) {
+                currentlyDisplayedData = data; // Keep track of what's shown
+                const headers = fullData.length > 0 ? Object.keys(fullData[0]) : [];
+                if (headers.length === 0) {
+                    tableContainer.innerHTML = '<p>No data to display.</p>';
+                    return;
+                }
+                const table = document.createElement('table');
+                
+                const thead = `<thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>`;
+                
+                const highlightEnabled = document.getElementById('highlightCheckbox')?.checked;
+                
+                const bodyRows = data.map(rowData => {
+                    const key = Object.values(rowData).slice(0, 9).join(',');
+                    const isDuplicate = highlightEnabled && duplicateKeys.has(key);
+                    const rowClass = isDuplicate ? 'class="duplicate-row"' : '';
+                    const cells = headers.map(h => `<td>${rowData[h] || ''}</td>`).join('');
+                    return `<tr ${rowClass}>${cells}</tr>`;
+                }).join('');
+
+                table.innerHTML = `${thead}<tbody>${bodyRows}</tbody>`;
+                tableContainer.innerHTML = '';
+                tableContainer.appendChild(table);
+            }
+
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const filteredData = fullData.filter(row => 
+                    Object.values(row).some(value => value.toLowerCase().includes(searchTerm))
+                );
+                renderTable(filteredData);
+            });
+        });
+    </script>
+
+</body>
+</html>
