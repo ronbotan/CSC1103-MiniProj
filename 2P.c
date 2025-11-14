@@ -5,20 +5,52 @@
 #define COLUMN 3
 
 //Pass by value, 2D Array values passed from main to sub-function to check for winners
-int checkWin(char board[ROW][COLUMN]) {
-    for (int i = 0; i < ROW; i++) {
-        // Check rows and columns
-        if ((board[i][0] != ' ' && board[i][0] == board[i][1] && board[i][1] == board[i][2]) || (board[0][i] != ' ' && board[0][i] == board[1][i] && board[1][i] == board[2][i]))
-            return 1;
+int checkWin(char b[ROW][COLUMN], int winline[3]) {
+    for (int r = 0; r < 3; r++) {
+        if (b[r][0] != ' ' && b[r][0] == b[r][1] && b[r][1] == b[r][2]) {
+            //If the condition fits, assign the winner using the value inside
+            winner = b[r][0];
+            //Assign the box number for winline. Used for draw function
+            winline[0] = (r*3+0);
+            winline[1] = (r*3+1);
+            winline[2] = (r*3+2);
+            return winner;
+        }
     }
-    // Check diagonals
-    if (board[1][1] != ' ') { //If centre is taken, then check further. If centre is not taken. there is no diagonals. Nested if loops
-        if((board[0][0] == board[1][1] && board[1][1] == board[2][2])) {
-            return 1;
+
+    // Check columns. If first value of column is not blank, check if all 3 are the same
+    for (int c = 0; c < 3; c++) {
+        if (b[0][c] != ' ' && b[0][c] == b[1][c] && b[1][c] == b[2][c]) {
+            //If the condition fits, assign the winner using the value inside
+            winner = b[0][c];
+            //Assign the box number for winline. Used for draw function
+            winline[0] = (0*3+c);
+            winline[1] = (1*3+c);
+            winline[2] = (2*3+c);
+            return winner;
         }
-        if(board[0][2] == board[1][1] && board[1][1] == board[2][0]) {
-            return 1;
-        }
+    }
+
+    // Check topleft to bottomright diagonal
+    if (b[1][1] != ' ' && (b[0][0] == b[1][1] && b[1][1] == b[2][2])) {
+        //If the condition fits, assign the winner using the value inside
+        winner = b[1][1];
+        //Assign the box number for winline. Used for draw function
+        winline[0] = 0;
+        winline[1] = 4;
+        winline[2] = 8;
+        return winner;
+    }
+
+    // Check topright to bottomleft diagonal
+    if (b[1][1] != ' ' && (b[0][2] == b[1][1] && b[1][1] == b[2][0])) {
+        //If the condition fits, assign the winner using the value inside
+        winner = b[1][1];
+        //Assign the box number for winline. Used for draw function
+        winline[0] = 2; 
+        winline[1] = 4; 
+        winline[2] = 6;
+        return winner;
     }
     return 0;
 }
@@ -35,7 +67,8 @@ int checkFull(char* charPtr) {
 char Run2P(char board[][3], char* boardPtr, char player){
     char winner, loser;
     int input, row, col, result;
-    srand((unsigned)time(NULL));
+    static int winLine[3] = {-1, -1, -1};
+
     //----------------------------------------------
     // open a pipe and keep the window open even after the program ends
     FILE *gp = _popen("gnuplot -persist", "w");
@@ -46,7 +79,7 @@ char Run2P(char board[][3], char* boardPtr, char player){
     //----------------------------------------------
     while (1)
     {
-        draw(gp, board, winner);
+        draw(gp, board, winner, winLine);
         fflush(stdin);
         printf("\nPlayer %c, select a box (1-9): ", player);
         scanf("%d", &input);
@@ -69,21 +102,21 @@ char Run2P(char board[][3], char* boardPtr, char player){
 
         // Make move
         board[row][col] = player;
-        draw(gp, board, winner);
+        draw(gp, board, winner, winLine);
 
         // Check for win
-        result = checkWin(board);
+        result = checkWin(board, winLine);
         if (result){
             printf("Player %c wins!\n", player);
             winner = player;
-            draw(gp, board, winner);
+            draw(gp, board, winner, winLine);
             loser = (player == 'O') ? 'X' : 'O';
             break;
         }
         else if (checkFull(boardPtr)) { // Check for draw
             printf("It's a draw!\n");
             winner = 'D';
-            draw(gp, board, winner);
+            draw(gp, board, winner, winLine);
             break;
         }
         // One line if else statement based on lecture notes
