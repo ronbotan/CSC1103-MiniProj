@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <wchar.h>
 
 #define scoreboard "scoreboard.txt"
 #define MAXPLAYERS 10

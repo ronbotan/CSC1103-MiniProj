@@ -72,6 +72,7 @@ char Run2P(char board[][3], char* boardPtr, char player)
         // Make move
         board[row][col] = player;
         draw(gp, board);
+
         // Check for win
         result = checkWin(board);
         if (result)

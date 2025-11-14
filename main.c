@@ -11,6 +11,7 @@ int main() {
         {' ', ' ', ' '},
         {' ', ' ', ' '}
     };
+
     char* boardPtr = &board[0][0];
     
     char player = 'O'; //Initialise first player as O
