@@ -1,5 +1,6 @@
-#include "2p.c"
+#include "2p.h"
 #include "scoreboard.c"
+#include "single_player_knn.h"
 
 
 int main() {
@@ -44,10 +45,13 @@ int main() {
         
         case (2): //Run 1 player easy mode
             readName(player1, player);
+            
             break;
             
         case (3): //Run 1 player normal mode (CHARMAIN TAN JIA YI)
-            readName(player1, player);
+            readName(player1, 'O');
+            winner = Run1PKnn(board, "KNN/bestmoves.csv");
+            updateScores(winner, player1, "AI");
             break;
 
         case (4): //Run 1 player hard mode

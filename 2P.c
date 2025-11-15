@@ -1,4 +1,4 @@
-#include "gnuplot.c"
+#include "gnuplot.h"
 #include <stdio.h>
 
 #define ROW 3

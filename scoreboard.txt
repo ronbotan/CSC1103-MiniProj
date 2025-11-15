@@ -3,3 +3,6 @@ Shaun 8 1 37
 Bob 0 0 10
 Charmain 1 0 2
 Charman 0 0 2
+charmain 3 1 5
+tan 0 0 1
+AI 1 1 4
