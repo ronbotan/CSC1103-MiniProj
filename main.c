@@ -20,13 +20,13 @@ int main() {
 
     do
     {
-        printf("\n ⭕ ❌ Select a Mode ❌ ⭕\n");
+        printf("\nSelect a Mode\n");
         printf("%-10s | %-5s\n", "Selection:", "Mode");
         printf("-----------------------------------\n");
-        printf("%-10s | %-10s\n", "1:", "2 Player 🙋 🙋");
-        printf("%-10s | %-10s\n", "2:", "1 Player Easy 🤖");
-        printf("%-10s | %-10s\n", "3:", "1 Player Normal 🤖");
-        printf("%-10s | %-10s\n", "4:", "1 Player Hard 🤖");
+        printf("%-10s | %-10s\n", "1:", "2 Player");
+        printf("%-10s | %-10s\n", "2:", "1 Player Easy");
+        printf("%-10s | %-10s\n", "3:", "1 Player Normal");
+        printf("%-10s | %-10s\n", "4:", "1 Player Hard");
         printf("Selection: ");
         scanf("%d", &mode);
         getchar(); //Clearing of input buffer

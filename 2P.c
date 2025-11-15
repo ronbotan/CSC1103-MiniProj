@@ -63,7 +63,7 @@ int checkFull(char* charPtr) {
     } return 1; //If all iterations run and there is no blanks, return 1 to indicate it is full
 }
 
-
+//2 Player Game to be run in main
 char Run2P(char board[][3], char* boardPtr, char player){
     char winner, loser;
     int input, row, col, result;
@@ -76,7 +76,7 @@ char Run2P(char board[][3], char* boardPtr, char player){
 
     while (1)
     {
-        draw(board, winner, winLine);
+        draw(board, winner, winLine); //Call Draw function from GUI
         fflush(stdin);
         printf("\nPlayer %c, select a box (1-9): ", player);
         scanf("%d", &input);
@@ -106,17 +106,16 @@ char Run2P(char board[][3], char* boardPtr, char player){
         if (result){
             printf("Player %c wins!\n", player);
             winner = player;
-            draw(board, winner, winLine);
+            draw(board, winner, winLine); //Call Draw function from GUI
             loser = (player == 'O') ? 'X' : 'O';
             break;
         }
         else if (checkFull(boardPtr)) { // Check for draw
             printf("It's a draw!\n");
             winner = 'D';
-            draw(board, winner, winLine);
+            draw(board, winner, winLine); //Call Draw function from GUI
             break;
         }
-        // One line if else statement based on lecture notes
         // If player==O is true player becomes X. Else if player==O is false, player becomes O
         player = (player == 'O') ? 'X' : 'O';
     }
