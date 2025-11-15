@@ -7,7 +7,7 @@
 //Pass by value, 2D Array values passed from main to sub-function to check for winners
 int checkWin(char b[ROW][COLUMN], int winline[3]) {
     for (int r = 0; r < 3; r++) {
-        if (b[r][0] != ' ' && b[r][0] == b[r][1] && b[r][1] == b[r][2]) {
+        if (b[r][0] != ' ' && ((b[r][0] == b[r][1]) && (b[r][1] == b[r][2]))) {
             //If the condition fits, assign the winner using the value inside
             winner = b[r][0];
             //Assign the box number for winline. Used for draw function
@@ -20,7 +20,7 @@ int checkWin(char b[ROW][COLUMN], int winline[3]) {
 
     // Check columns. If first value of column is not blank, check if all 3 are the same
     for (int c = 0; c < 3; c++) {
-        if (b[0][c] != ' ' && b[0][c] == b[1][c] && b[1][c] == b[2][c]) {
+        if (b[0][c] != ' ' && ((b[0][c] == b[1][c]) && (b[1][c] == b[2][c]))) {
             //If the condition fits, assign the winner using the value inside
             winner = b[0][c];
             //Assign the box number for winline. Used for draw function
@@ -32,7 +32,7 @@ int checkWin(char b[ROW][COLUMN], int winline[3]) {
     }
 
     // Check topleft to bottomright diagonal
-    if (b[1][1] != ' ' && (b[0][0] == b[1][1] && b[1][1] == b[2][2])) {
+    if (b[1][1] != ' ' && ((b[0][0] == b[1][1]) && (b[1][1] == b[2][2]))) {
         //If the condition fits, assign the winner using the value inside
         winner = b[1][1];
         //Assign the box number for winline. Used for draw function
@@ -43,7 +43,7 @@ int checkWin(char b[ROW][COLUMN], int winline[3]) {
     }
 
     // Check topright to bottomleft diagonal
-    if (b[1][1] != ' ' && (b[0][2] == b[1][1] && b[1][1] == b[2][0])) {
+    if (b[1][1] != ' ' && ((b[0][2] == b[1][1]) && (b[1][1] == b[2][0]))) {
         //If the condition fits, assign the winner using the value inside
         winner = b[1][1];
         //Assign the box number for winline. Used for draw function
@@ -69,17 +69,14 @@ char Run2P(char board[][3], char* boardPtr, char player){
     int input, row, col, result;
     static int winLine[3] = {-1, -1, -1};
 
-    //----------------------------------------------
-    // open a pipe and keep the window open even after the program ends
-    FILE *gp = _popen("gnuplot -persist", "w");
-    if (!gp) {
+    if (!init_gnuplot()) {
         printf("Could not open gnuplot.\n");
         return 1;
     }
-    //----------------------------------------------
+
     while (1)
     {
-        draw(gp, board, winner, winLine);
+        draw(board, winner, winLine);
         fflush(stdin);
         printf("\nPlayer %c, select a box (1-9): ", player);
         scanf("%d", &input);
@@ -102,27 +99,28 @@ char Run2P(char board[][3], char* boardPtr, char player){
 
         // Make move
         board[row][col] = player;
-        draw(gp, board, winner, winLine);
+        draw(board, winner, winLine);
 
         // Check for win
         result = checkWin(board, winLine);
         if (result){
             printf("Player %c wins!\n", player);
             winner = player;
-            draw(gp, board, winner, winLine);
+            draw(board, winner, winLine);
             loser = (player == 'O') ? 'X' : 'O';
             break;
         }
         else if (checkFull(boardPtr)) { // Check for draw
             printf("It's a draw!\n");
             winner = 'D';
-            draw(gp, board, winner, winLine);
+            draw(board, winner, winLine);
             break;
         }
         // One line if else statement based on lecture notes
         // If player==O is true player becomes X. Else if player==O is false, player becomes O
         player = (player == 'O') ? 'X' : 'O';
     }
-    _pclose(gp);
+    close_gnuplot();
+
     return winner;
 }

@@ -13,9 +13,30 @@
 static char board[3][3];
 static char winner = EMPTY;   // 'X', 'O', ' ', or 'D' (draw)
 
-/* ---------- DRAW USING GNUPLOT ---------- */
-void draw(FILE *gp, char board[3][3], char winner, int winLine[3])
+/* file handle for gnuplot pipe is owned by this module */
+static FILE *gp = NULL;
+
+/* Open gnuplot pipe. Returns 1 on success, 0 on failure. */
+int init_gnuplot(void)
 {
+    if (gp != NULL) return 1; /* already open */
+    gp = _popen("gnuplot -persist", "w");
+    return gp != NULL;
+}
+
+/* Close gnuplot pipe if open. */
+void close_gnuplot(void)
+{
+    if (gp) {
+        _pclose(gp);
+        gp = NULL;
+    }
+}
+
+/* ---------- DRAW USING GNUPLOT ---------- */
+void draw(char board[3][3], char winner, int winLine[3])
+{
+    if (!gp) return; /* nothing to draw to */
     fprintf(gp, "unset object\n");
     fprintf(gp, "unset arrow\n");
 
