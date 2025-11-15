@@ -1,4 +1,5 @@
-#include "2p.c"
+#include "2P.c"
+#include "1P.c"
 #include "scoreboard.c"
 
 
@@ -43,7 +44,10 @@ int main() {
             break;
         
         case (2): //Run 1 player easy mode
-            readName(player1, player);
+            readName(player1, 'X');
+            strcpy(player2, "AI");
+            winner = Run1P(board, 2);   
+            updateScores(winner, player2, player1);
             break;
             
         case (3): //Run 1 player normal mode (CHARMAIN TAN JIA YI)
@@ -51,7 +55,10 @@ int main() {
             break;
 
         case (4): //Run 1 player hard mode
-            readName(player1, player);
+            readName(player1, 'X');
+            strcpy(player2, "AI");
+            winner = Run1P(board, 4);
+            updateScores(winner, player2, player1);
             break;
         }
     
