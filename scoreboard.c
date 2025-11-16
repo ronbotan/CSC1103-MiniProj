@@ -157,7 +157,7 @@ void showScores() {
     Players players[MAXPLAYERS];
     int count = readScores(players, 100);
 
-    printf("\n🏆 Current Scoreboard 🏆\n");
+    printf("\n   Current Scoreboard   \n");
     printf("%-20s | %-5s | %-5s | %-6s\n", "Name", "Wins", "Draws", "Games");
     printf("-----------------------------------\n");
     for (int i = 0; i < count; i++) {

@@ -45,10 +45,10 @@ int main() {
             break;
         
         case (2): //Run 1 player easy mode
-            readName(player1, 'X');
-            strcpy(player2, "AI");
+            readName(player1, 'O');
+            strcpy(player2, "AI Easy");
             winner = Run1P(board, 2);   
-            updateScores(winner, player2, player1);
+            updateScores(winner, player1, player2);
             break;
             
         case (3): //Run 1 player normal mode (CHARMAIN TAN JIA YI)
@@ -58,10 +58,10 @@ int main() {
             break;
 
         case (4): //Run 1 player hard mode
-            readName(player1, 'X');
-            strcpy(player2, "AI");
+            readName(player1, 'O');
+            strcpy(player2, "AI Hard");
             winner = Run1P(board, 4);
-            updateScores(winner, player2, player1);
+            updateScores(winner, player1, player2);
             break;
         }
     
