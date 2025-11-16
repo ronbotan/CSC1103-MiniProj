@@ -59,6 +59,19 @@ char Run1PKnn(char board[3][3], const char* dataset_path) {
             if (move == -1) break;
             int r = (move - 1) / 3;
             int c = (move - 1) % 3;
+            if (board[r][c] != ' ') {
+                int found = 0;
+                for (int idx = 0; idx < 9; ++idx) {
+                    int rr = idx / 3, cc = idx % 3;
+                    if (board[rr][cc] == ' ') {
+                    r = rr;
+                    c = cc;
+                    found = 1;
+                    break;
+                    }
+                }
+                if (!found) break;
+            }
             board[r][c] = 'X';
             printf("AI plays %d\n", move);
         }
