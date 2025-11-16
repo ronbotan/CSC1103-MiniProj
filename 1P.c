@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define HUMAN 'X'
-#define AI 'O'
+#define HUMAN 'O'
+#define AI 'X'
 
 int hasEmpty(char b[3][3]);
 int whoWins(char b[3][3]);
