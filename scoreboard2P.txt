@@ -3,5 +3,3 @@ Charman 1 0 3
 Shaun 8 1 37
 Bob 0 0 10
 Charmain 1 0 2
-1 1 0 1
-AI Easy 0 0 1

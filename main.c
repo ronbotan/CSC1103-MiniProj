@@ -1,6 +1,7 @@
-#include "2P.c"
+#include "2p.c"
 #include "1P.c"
 #include "scoreboard.c"
+#include "single_player_knn.c"
 
 #define scoreboard2P "scoreboard2P.txt"
 #define scoreboardEasy "scoreboardEasy.txt"
@@ -55,7 +56,7 @@ int main() {
             break;
             
         case (3): //Run 1 player normal mode (CHARMAIN TAN JIA YI)
-            readName(player1, 'O');
+            readName(player1, player);
             break;
 
         case (4): //Run 1 player hard mode
