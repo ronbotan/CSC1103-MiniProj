@@ -5,14 +5,13 @@
 #include <ctype.h>
 #include <string.h>
 #include <time.h>
-#include "gnuplot.h"
 
 /* ---- Board symbols ---- */
 #define EMPTY ' '
 
 /* 3×3 Tic Tac Toe grid */
-char board[3][3];
-char winner = EMPTY;   // 'X', 'O', ' ', or 'D' (draw)
+static char board[3][3];
+static char winner = EMPTY;   // 'X', 'O', ' ', or 'D' (draw)
 
 /* file handle for gnuplot pipe is owned by this module */
 static FILE *gp = NULL;

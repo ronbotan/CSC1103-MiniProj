@@ -1,4 +1,4 @@
-#include "gnuplot.h"
+#include "gnuplot.c"
 #include <stdio.h>
 
 #define ROW 3
@@ -67,7 +67,7 @@ int checkFull(char* charPtr) {
 char Run2P(char board[][3], char* boardPtr, char player){
     char winner, loser;
     int input, row, col, result;
-    static int winLine[3] = {-1, -1, -1};
+    int winLine[3] = {-1, -1, -1};
 
     if (!init_gnuplot()) {
         printf("Could not open gnuplot.\n");

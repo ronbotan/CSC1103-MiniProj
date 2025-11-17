@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <time.h>
 
-
 #define HUMAN 'O'
 #define AI 'X'
 
