@@ -31,15 +31,15 @@ static void sort_by_wins_desc(Players players[], int count) {
 
 void readName(char player[], char p);
 void trim(char *str);
-void showScores(char scoreboard[]);
+void showScores(const char *label, char scoreboard[]);
 void updateDraw(char *player1, char *player2, char scoreboard[]);
 void updateLoserScore(char *loserName, char scoreboard[]);
 void updatePlayerScore(char *winnerName, char scoreboard[]);
 void saveScores(Players players[], int count, char scoreboard[]);
 int readScores(Players players[], int maxPlayers, char scoreboard[]);
-void updateScores(char winner, char player1[], char player2[], char scoreboard[]);
+void updateScores(char winner, char player1[], char player2[],const char *label, char scoreboard[]);
 
-void updateScores(char winner, char player1[], char player2[], char scoreboard[]) {
+void updateScores(char winner, char player1[], char player2[],const char *label, char scoreboard[]) {
     if (winner == 'O') { //Player 1 win
         updatePlayerScore(player1, scoreboard);
         updateLoserScore(player2, scoreboard);
@@ -51,7 +51,7 @@ void updateScores(char winner, char player1[], char player2[], char scoreboard[]
     else if (winner == 'D') { //DRAW
         updateDraw(player1, player2, scoreboard);
     }
-    showScores(scoreboard); //Show scores after updating
+    showScores(label,scoreboard); //Show scores after updating
 }
 
 
@@ -170,11 +170,11 @@ void updateDraw(char *player1, char *player2, char scoreboard[]) {
     saveScores(players, count, scoreboard);
 }
 
-void showScores(char scoreboard[]) {
+void showScores(const char *label,char scoreboard[]) {
     Players players[MAXPLAYERS];
     int count = readScores(players, 100, scoreboard);
 
-    printf("\n   Current Scoreboard   \n");
+    printf("\n  %s Current Scoreboard   \n",label);
     printf("%-20s | %-5s | %-5s | %-6s\n", "Name", "Wins", "Draws", "Games");
     printf("-----------------------------------\n");
     for (int i = 0; i < count; i++) {

@@ -1,2 +1,3 @@
 charmain 1 0 1
-AI Easy 0 0 1
+Tricia 1 0 1
+AIEasy 0 0 1
