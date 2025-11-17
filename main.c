@@ -3,6 +3,10 @@
 #include "scoreboard.c"
 #include "single_player_knn.c"
 
+#define scoreboard2P "scoreboard2P.txt"
+#define scoreboardEasy "scoreboardEasy.txt"
+#define scoreboardNormal "scoreboardNormal.txt"
+#define scoreboardHard "scoreboardHard.txt"
 
 int main() {
     int mode;
@@ -41,14 +45,14 @@ int main() {
             readName(player1, 'O'); //Assign player 1 as O
             readName(player2, 'X'); //Assign player 2 as X
             winner = Run2P(board, boardPtr, player); //Run 2 player game and return the winner as X or O
-            updateScores(winner, player1, player2); //Update the scoreboard for the winner. O = P1, X = P2, D = DRAW
+            updateScores(winner, player1, player2, scoreboard2P); //Update the scoreboard for the winner. O = P1, X = P2, D = DRAW
             break;
         
         case (2): //Run 1 player easy mode
             readName(player1, 'O');
             strcpy(player2, "AI Easy");
             winner = Run1P(board, 2);   
-            updateScores(winner, player1, player2);
+            updateScores(winner, player1, player2, scoreboardEasy);
             break;
             
         case (3): //Run 1 player normal mode (CHARMAIN TAN JIA YI)
@@ -59,7 +63,7 @@ int main() {
             readName(player1, 'O');
             strcpy(player2, "AI Hard");
             winner = Run1P(board, 4);
-            updateScores(winner, player1, player2);
+            updateScores(winner, player1, player2, scoreboardHard);
             break;
         }
     
