@@ -2,7 +2,6 @@
 #include <string.h>
 #include <wchar.h>
 
-#define scoreboard "scoreboard.txt"
 #define MAXPLAYERS 10
 
 // Create a structure to link the score to player names
@@ -14,34 +13,50 @@ typedef struct Players{
     int played;
 } Players;
 
+static void sort_by_wins_desc(Players players[], int count) {
+    for (int i = 0; i < count - 1; ++i) {
+        int best = i;
+        for (int j = i + 1; j < count; ++j) {
+            if (players[j].win > players[best].win) {
+                best = j;
+            }
+        }
+        if (best != i) {
+            Players tmp = players[i];
+            players[i] = players[best];
+            players[best] = tmp;
+        }
+    }
+}
+
 void readName(char player[], char p);
 void trim(char *str);
-void showScores();
-void updateDraw(char *player1, char *player2);
-void updateLoserScore(char *loserName);
-void updatePlayerScore(char *winnerName);
-void saveScores(Players players[], int count);
-int readScores(Players players[], int maxPlayers);
-void updateScores(char winner, char player1[], char player2[]);
+void showScores(char scoreboard[]);
+void updateDraw(char *player1, char *player2, char scoreboard[]);
+void updateLoserScore(char *loserName, char scoreboard[]);
+void updatePlayerScore(char *winnerName, char scoreboard[]);
+void saveScores(Players players[], int count, char scoreboard[]);
+int readScores(Players players[], int maxPlayers, char scoreboard[]);
+void updateScores(char winner, char player1[], char player2[], char scoreboard[]);
 
-void updateScores(char winner, char player1[], char player2[]) {
+void updateScores(char winner, char player1[], char player2[], char scoreboard[]) {
     if (winner == 'O') { //Player 1 win
-        updatePlayerScore(player1);
-        updateLoserScore(player2);
+        updatePlayerScore(player1, scoreboard);
+        updateLoserScore(player2, scoreboard);
     }
     else if (winner == 'X') {//Player 2 win
-        updatePlayerScore(player2);
-        updateLoserScore(player1);
+        updatePlayerScore(player2, scoreboard);
+        updateLoserScore(player1, scoreboard);
     }
     else if (winner == 'D') { //DRAW
-        updateDraw(player1, player2);
+        updateDraw(player1, player2, scoreboard);
     }
-    showScores(); //Show scores after updating
+    showScores(scoreboard); //Show scores after updating
 }
 
 
 // Load scores into an array of Player structs
-int readScores(Players players[], int maxPlayers) {
+int readScores(Players players[], int maxPlayers, char scoreboard[]) {
     FILE *fp = fopen(scoreboard, "r");
     if (fp == NULL) // No file of this name, break out
         return 0; 
@@ -57,7 +72,9 @@ int readScores(Players players[], int maxPlayers) {
 }
 
 // Write all players back to file
-void saveScores(Players players[], int count) {
+void saveScores(Players players[], int count, char scoreboard[]) {
+    sort_by_wins_desc(players, count);
+    
     FILE *fp = fopen(scoreboard, "w");
     if (fp == NULL) {
         printf("Error writing scoreboard.\n");
@@ -74,15 +91,15 @@ void saveScores(Players players[], int count) {
 }
 
 // Update or add a player’s score
-void updatePlayerScore(char *winnerName) {
+void updatePlayerScore(char *winnerName, char scoreboard[]) {
     Players players[MAXPLAYERS];
-    int count = readScores(players, 100);
+    int count = readScores(players, 100, scoreboard);
 
     for (int i = 0; i < count; i++) {
         if (strcmp(players[i].name, winnerName) == 0) {
             players[i].win++;
             players[i].played++;
-            saveScores(players, count);
+            saveScores(players, count, scoreboard);
             return;
         }
     }
@@ -93,17 +110,17 @@ void updatePlayerScore(char *winnerName) {
     players[count].draw = 0;
     players[count].played = 1;
     count++;
-    saveScores(players, count);
+    saveScores(players, count, scoreboard);
 }
 
-void updateLoserScore(char *loserName) {
+void updateLoserScore(char *loserName, char scoreboard[]) {
     Players players[MAXPLAYERS];
-    int count = readScores(players, 100);
+    int count = readScores(players, 100, scoreboard);
 
     for (int i = 0; i < count; i++) {
         if (strcmp(players[i].name, loserName) == 0) {
             players[i].played++;
-            saveScores(players, count);
+            saveScores(players, count, scoreboard);
             return;
         }
     }
@@ -114,12 +131,12 @@ void updateLoserScore(char *loserName) {
     players[count].draw = 0;
     players[count].played = 1;
     count++;
-    saveScores(players, count);
+    saveScores(players, count, scoreboard);
 }
 
-void updateDraw(char *player1, char *player2) {
+void updateDraw(char *player1, char *player2, char scoreboard[]) {
     Players players[MAXPLAYERS];
-    int count = readScores(players, 100);
+    int count = readScores(players, MAXPLAYERS, scoreboard);
     int found1 = 0, found2 = 0;
 
     for (int i = 0; i < count; i++) {
@@ -150,12 +167,12 @@ void updateDraw(char *player1, char *player2) {
         count++;
     }
 
-    saveScores(players, count);
+    saveScores(players, count, scoreboard);
 }
 
-void showScores() {
+void showScores(char scoreboard[]) {
     Players players[MAXPLAYERS];
-    int count = readScores(players, 100);
+    int count = readScores(players, 100, scoreboard);
 
     printf("\n   Current Scoreboard   \n");
     printf("%-20s | %-5s | %-5s | %-6s\n", "Name", "Wins", "Draws", "Games");

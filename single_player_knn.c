@@ -56,21 +56,20 @@ char Run1PKnn(char board[3][3], const char* dataset_path) {
             board[r][c] = 'O';
         } else {
             int move = pick_knn_move(board, data, record_count);
-            if (move == -1) break;
             int r = (move - 1) / 3;
             int c = (move - 1) % 3;
             if (board[r][c] != ' ') {
-                int found = 0;
+                int fallback = -1;
                 for (int idx = 0; idx < 9; ++idx) {
                     int rr = idx / 3, cc = idx % 3;
                     if (board[rr][cc] == ' ') {
-                    r = rr;
-                    c = cc;
-                    found = 1;
-                    break;
+                        r = rr;
+                        c = cc;
+                        fallback = idx + 1;
+                        break;
                     }
                 }
-                if (!found) break;
+                if (fallback != -1) move = fallback; // update the index we’ll report
             }
             board[r][c] = 'X';
             printf("AI plays %d\n", move);

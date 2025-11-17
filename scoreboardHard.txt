@@ -1,0 +1,4 @@
+charmain 0 1 1
+Charmain 0 0 1
+Alicia 0 1 1
+AI Hard 0 1 1
