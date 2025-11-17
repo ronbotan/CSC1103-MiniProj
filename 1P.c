@@ -3,7 +3,6 @@
 #include <time.h>
 #include "gnuplot.h"
 
-
 #define HUMAN 'O'
 #define AI 'X'
 
@@ -203,6 +202,7 @@ int minimaxLogic(char b[3][3], int isAITurn) {
     // Human turn
     else { 
         int foundDraw = 0;
+        int foundAIWin = 0;
 
         for (int r=0 ; r<3 ; r++) {
             for (int c=0 ; c<3 ; c++) {
@@ -221,12 +221,25 @@ int minimaxLogic(char b[3][3], int isAITurn) {
                     if (result == 3) {
                         foundDraw = 1;
                     }
+
+                    // Track AI win possibility
+                    if (result == 2) {
+                        foundAIWin = 1;
+                    }
                 }
             }
         }
 
         // If a draw move is found, return 3; else AI win, return 2
-        return foundDraw ? 3 : 2;
+        if (foundDraw) {
+            return 3;
+        }
+        else if (foundAIWin) {
+            return 2;
+        }
+        else {
+            return 1;
+        }
     }
 }
 
@@ -263,29 +276,48 @@ void aiTurn(char b[3][3], int mode) {
 
     // Hard: Human must lose
     if (mode == 4) {
+
+        int winMoves[9][2];
+        int winCount = 0;
+
+        int drawMoves[9][2];
+        int drawCount = 0;
+
         for (int r=0 ; r<3 ; r++) {
             for (int c=0 ; c<3 ; c++) {
                 if (b[r][c]==' ') {
                     char temp = b[r][c];
                     b[r][c] = AI;
-                    int outcome = minimaxLogic(b, 0);          // Same action as minimaxLogic()
-                    b[r][c] = temp;
+                    int outcome = minimaxLogic(b, 0);          
+                    b[r][c] = ' ';
 
                     // AI can win
                     if (outcome==2) {  
-                        bestRow = r; bestCol = c;              // If this move leads AI to win, use it
-                        break;
-                    } else if (outcome==3 && bestRow==-1) {
-                        bestRow = r; bestCol = c;              // Save a draw move if no win found yet    
+                        winMoves[winCount][0] = r;
+                        winMoves[winCount][1] = c;      
+                        winCount ++;
+                    } 
+                    else if (outcome==3) {
+                        drawMoves[drawCount][0] = r;
+                        drawMoves[drawCount][1] = c;    
+                        drawCount++;          
                     }
                 }
             }
-
-            // Stop searching if move chosen
-            if (bestRow!=-1) {
-                break;
-            } 
         }
+        
+        // If any winning move exists then use it
+        if (winCount > 0) {
+            bestRow = winMoves[0][0];
+            bestCol = winMoves[0][1];
+        }
+
+        // Otherwise pick a draw move
+        else if (drawCount > 0) {
+            bestRow = drawMoves[0][0];
+            bestCol = drawMoves[0][1];
+        }
+
     } 
 
     // Easy - Human must win
