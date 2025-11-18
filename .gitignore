@@ -1,4 +1,4 @@
 *.exe
-!main.exe
+
 !test.exe
 !play.exe
