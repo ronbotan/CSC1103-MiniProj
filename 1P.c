@@ -6,13 +6,6 @@
 #define HUMAN 'O'
 #define AI 'X'
 
-int hasEmpty(char b[3][3]);
-int whoWins(char b[3][3]);
-int minimaxLogic(char b[3][3], int isAITurn);
-void aiTurn(char b[3][3], int mode);
-void humanTurn(char b[3][3]);
-void getWinLine(char b[3][3], int winLine[3]);
-
 /* 1 Player Mode */
 /* Difficulty = 2 --> Easy (HUman must win) */
 /* Difficulty = 4 --> Hard (HUman must lose) */
