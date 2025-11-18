@@ -1,0 +1,6 @@
+charmain 3 0 5
+AI 3 1 11
+chao 2 0 2
+Alicia 1 0 1
+Amanda 0 0 1
+Qiqi 0 1 1

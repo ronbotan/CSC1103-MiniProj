@@ -13,17 +13,34 @@ typedef struct Players{
     int played;
 } Players;
 
+static void sort_by_wins_desc(Players players[], int count) {
+    for (int i = 0; i < count - 1; ++i) {
+        int best = i;
+        for (int j = i + 1; j < count; ++j) {
+            if (players[j].win > players[best].win) {
+                best = j;
+            }
+        }
+        if (best != i) {
+            Players tmp = players[i];
+            players[i] = players[best];
+            players[best] = tmp;
+        }
+    }
+}
+
 void readName(char player[], char p);
 void trim(char *str);
-void showScores(char scoreboard[]);
+void showScores(const char *label, char scoreboard[]);
 void updateDraw(char *player1, char *player2, char scoreboard[]);
 void updateLoserScore(char *loserName, char scoreboard[]);
 void updatePlayerScore(char *winnerName, char scoreboard[]);
 void saveScores(Players players[], int count, char scoreboard[]);
 int readScores(Players players[], int maxPlayers, char scoreboard[]);
-void updateScores(char winner, char player1[], char player2[], char scoreboard[]);
+void updateScores(char winner, char player1[], char player2[],const char *label, char scoreboard[]);
+void swapRoles(char player1[], char player2[]);
 
-void updateScores(char winner, char player1[], char player2[], char scoreboard[]) {
+void updateScores(char winner, char player1[], char player2[],const char *label, char scoreboard[]) {
     if (winner == 'O') { //Player 1 win
         updatePlayerScore(player1, scoreboard);
         updateLoserScore(player2, scoreboard);
@@ -35,7 +52,7 @@ void updateScores(char winner, char player1[], char player2[], char scoreboard[]
     else if (winner == 'D') { //DRAW
         updateDraw(player1, player2, scoreboard);
     }
-    showScores(scoreboard); //Show scores after updating
+    showScores(label,scoreboard); //Show scores after updating
 }
 
 
@@ -57,6 +74,8 @@ int readScores(Players players[], int maxPlayers, char scoreboard[]) {
 
 // Write all players back to file
 void saveScores(Players players[], int count, char scoreboard[]) {
+    sort_by_wins_desc(players, count);
+    
     FILE *fp = fopen(scoreboard, "w");
     if (fp == NULL) {
         printf("Error writing scoreboard.\n");
@@ -152,11 +171,11 @@ void updateDraw(char *player1, char *player2, char scoreboard[]) {
     saveScores(players, count, scoreboard);
 }
 
-void showScores(char scoreboard[]) {
+void showScores(const char *label,char scoreboard[]) {
     Players players[MAXPLAYERS];
     int count = readScores(players, 100, scoreboard);
 
-    printf("\n   Current Scoreboard   \n");
+    printf("\n  %s Current Scoreboard   \n", label);
     printf("%-20s | %-5s | %-5s | %-6s\n", "Name", "Wins", "Draws", "Games");
     printf("-----------------------------------\n");
     for (int i = 0; i < count; i++) {
@@ -184,12 +203,9 @@ void readName(char player[], char p) {
     trim(player); //Run the trim function after reading using fgets to get rid of \n character
 }
 
-/*
-void readNames() {
-    static char player1[50], player2[50];
-    printf("Enter name for Player X: ");
-    fgets(player1, 50, stdin);
-    printf("Enter name for Player O: ");
-    fgets(player2, 50, stdin);
+void swapRoles(char player1[], char player2[]) {
+    char temp[20]; //Temporary array to hold player 1
+    strcpy(temp, player1); //Store player 1 into a tempArray
+    strcpy(player1, player2); //Move player 2 to player 1 position
+    strcpy(player2, temp); //Move tempArray (player 1) to player 2
 }
-*/
