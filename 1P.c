@@ -17,8 +17,10 @@ void getWinLine(char b[3][3], int winLine[3]);
 /* Difficulty = 4 --> Hard (HUman must lose) */
 char Run1P(char board[3][3], int difficulty)
 {
+    // Store game outcome
     int result = 0;
 
+    // Used for GUI to draw the winning line
     char winner = ' ';          
     int winLine[3] = {-1,-1,-1};
 
@@ -45,33 +47,34 @@ char Run1P(char board[3][3], int difficulty)
         // Human Move
         humanTurn(board);
 
-        result = whoWins(board);
+        result = whoWins(board);              // Check if human moved 3 in a row
 
-        if (result == 1) {
-            winner = HUMAN;
-            getWinLine(board, winLine);
-            draw(board, winner, winLine);
+        if (result == 1) {                    // If result return 1
+            winner = HUMAN;                   // Means winner is human
+            getWinLine(board, winLine);       // Find the final winning cells
+            draw(board, winner, winLine);     // Draw the winning line
             printf("\nYou Win!\n");
             break;
         }
 
-        if (!hasEmpty(board)) {
+        if (!hasEmpty(board)) {               // No empty cells means draw
             winner = 'D';
             draw(board, winner, winLine);
             printf("\n It's a Draw!\n");
             break;
         }
 
+
         // AI Move
-        aiTurn(board, difficulty);
+        aiTurn(board, difficulty);            
 
-        result = whoWins(board);
+        result = whoWins(board);              // Check if AI move 3 in a row
 
-        if (result == 2) {
-            winner = AI;
-            getWinLine(board, winLine);
-            draw(board, winner, winLine);
-            printf("\nAI Wins!\n");
+        if (result == 2) {                    // If result is 2
+            winner = AI;                      // Means winner is AI
+            getWinLine(board, winLine);       // Find the final winning cells
+            draw(board, winner, winLine);     // Draw winning line
+            printf("\nAI Wins!\n");          
             break;
         }
 
@@ -101,7 +104,9 @@ char Run1P(char board[3][3], int difficulty)
     // Draw
     else {
         return 'D';           
-    }          
+    }     
+    
+    
 }
 
 // Check if any empty spot exists
@@ -123,26 +128,26 @@ int hasEmpty(char b[3][3]) {
 */
 int whoWins(char b[3][3]) {
 
-    for (int i=0;i<3;i++) {
+    for (int i=0 ; i<3 ; i++) {
 
         // Check each row
-        if (b[i][0]!=' ' && b[i][0]==b[i][1] && b[i][1]==b[i][2]) {
+        if (b[i][0] != ' ' && b[i][0] == b[i][1] && b[i][1] == b[i][2]) {
             return (b[i][0]==HUMAN) ? 1 : 2;
         }
 
         // Check each column
-        if (b[0][i]!=' ' && b[0][i]==b[1][i] && b[1][i]==b[2][i]) {
+        if (b[0][i] != ' ' && b[0][i] == b[1][i] && b[1][i] == b[2][i]) {
             return (b[0][i]==HUMAN) ? 1 : 2;
         }
     }
 
     // Check diagonal (top left to bottom right)
-    if (b[0][0] != ' ' && b[0][0]==b[1][1] && b[1][1]==b[2][2]) {
+    if (b[0][0] != ' ' && b[0][0] == b[1][1] && b[1][1] == b[2][2]) {
         return (b[0][0]==HUMAN) ? 1 : 2;
     }
 
     // Check diagonal (top right to bottom left)
-    if (b[0][2] != ' ' && b[0][2]==b[1][1] && b[1][1]==b[2][0]) {
+    if (b[0][2] != ' ' && b[0][2] == b[1][1] && b[1][1] == b[2][0]) {
         return (b[0][2]==HUMAN) ? 1 : 2;
     }
 
@@ -179,7 +184,7 @@ int minimaxLogic(char b[3][3], int isAITurn) {
                     char temp = b[r][c];                  // Save original spot
                     b[r][c] = AI;                         // Temporarily put AI on the empty spot
                     int result = minimaxLogic(b, 0);      // Simulate human move after placed AI to empty spot
-                    b[r][c] = temp;                       // Undo the move
+                    b[r][c] = ' ';                        // Set the cell back to empty
                         
                     // AI can win
                     if (result == 2) {
@@ -209,7 +214,7 @@ int minimaxLogic(char b[3][3], int isAITurn) {
                     char temp = b[r][c];                  // Save original spot
                     b[r][c] = HUMAN;                      // Temporarily put Human on the empty spot 
                     int result = minimaxLogic(b, 1);      // Simulate AI move after placed Human to empty spot
-                    b[r][c] = temp;                       // Undo the move
+                    b[r][c] = ' ';                        // Set the cell back to empty
 
                     // Player can win
                     if (result == 1) {
@@ -250,7 +255,7 @@ void humanTurn(char b[3][3]) {
         printf("Enter your move (1-9): ");
 
         // Check if input number is between 1-9
-        if (scanf("%d", &choice) != 1 || choice < 1 || choice > 9) {
+        if (scanf("%d", &choice) != 1 || choice < 1 || choice > 9) {    
             printf("Invalid input!\n");
             while(getchar()!='\n');
             continue;
@@ -276,30 +281,30 @@ void aiTurn(char b[3][3], int mode) {
     // Hard: Human must lose
     if (mode == 4) {
 
-        int winMoves[9][2];
-        int winCount = 0;
+        int winMoves[9][2];            // To store all moves AI can win
+        int winCount = 0;              // Number of winning move found                      
 
-        int drawMoves[9][2];
-        int drawCount = 0;
-
+        int drawMoves[9][2];           // To store all the move that lead to draw 
+        int drawCount = 0;             // Number of draw move found
+ 
         for (int r=0 ; r<3 ; r++) {
             for (int c=0 ; c<3 ; c++) {
-                if (b[r][c]==' ') {
-                    char temp = b[r][c];
-                    b[r][c] = AI;
-                    int outcome = minimaxLogic(b, 0);          
-                    b[r][c] = ' ';
+                if (b[r][c] == ' ') {
+                    char temp = b[r][c];                 
+                    b[r][c] = AI;                        // Temporary put AI at empty spot
+                    int result = minimaxLogic(b, 0);    // Evaluate move outcome using minimax
+                    b[r][c] = ' ';                       // Set cell back to empty
 
                     // AI can win
-                    if (outcome==2) {  
-                        winMoves[winCount][0] = r;
+                    if (result == 2) {                  // If AI can win
+                        winMoves[winCount][0] = r;       // Record possible winning moves
                         winMoves[winCount][1] = c;      
-                        winCount ++;
+                        winCount ++;                     // Add winnng count
                     } 
-                    else if (outcome==3) {
-                        drawMoves[drawCount][0] = r;
+                    else if (result == 3) {             // If the game draw
+                        drawMoves[drawCount][0] = r;     // Record possile draw move
                         drawMoves[drawCount][1] = c;    
-                        drawCount++;          
+                        drawCount++;                     // Add draw count
                     }
                 }
             }
@@ -326,15 +331,15 @@ void aiTurn(char b[3][3], int mode) {
                 if (b[r][c]==' ') {
                     char temp = b[r][c];
                     b[r][c] = AI;
-                    int outcome = minimaxLogic(b, 0);
+                    int result = minimaxLogic(b, 0);         // Evaluate move result using minimax
                     b[r][c] = temp;
                                                            
-                    if (outcome==1) {  
+                    if (result == 1) {  
                         bestRow = r; bestCol = c;             // Pick the one that Human will win
                         break;
                     } 
                     
-                    else if (outcome==3 && bestRow==-1) {
+                    else if (result == 3 && bestRow == -1) {
                         bestRow = r; bestCol = c;             // Save draw move only if no losing one found yet
                     }
                 }
@@ -366,12 +371,12 @@ void aiTurn(char b[3][3], int mode) {
     b[bestRow][bestCol] = AI;
 }
 
-// Compute winning line for 1-player mode
+// Draw winning line
 void getWinLine(char b[3][3], int winLine[3]) {
 
     // Rows
     for (int r=0; r<3; r++) {
-        if (b[r][0]!=' ' && b[r][0]==b[r][1] && b[r][1]==b[r][2]) {
+        if (b[r][0] != ' ' && b[r][0] == b[r][1] && b[r][1] == b[r][2]) {
             winLine[0] = r*3 + 0;
             winLine[1] = r*3 + 1;
             winLine[2] = r*3 + 2;
@@ -381,7 +386,7 @@ void getWinLine(char b[3][3], int winLine[3]) {
 
     // Columns
     for (int c=0; c<3; c++) {
-        if (b[0][c]!=' ' && b[0][c]==b[1][c] && b[1][c]==b[2][c]) {
+        if (b[0][c] != ' ' && b[0][c] == b[1][c] && b[1][c] == b[2][c]) {
             winLine[0] = 0*3 + c;
             winLine[1] = 1*3 + c;
             winLine[2] = 2*3 + c;
@@ -390,7 +395,7 @@ void getWinLine(char b[3][3], int winLine[3]) {
     }
 
     // Diagonal (top left to bottom right)
-    if (b[0][0]!=' ' && b[0][0]==b[1][1] && b[1][1]==b[2][2]) {
+    if (b[0][0] != ' ' && b[0][0] == b[1][1] && b[1][1] == b[2][2]) {
         winLine[0] = 0;
         winLine[1] = 4;
         winLine[2] = 8;
@@ -398,7 +403,7 @@ void getWinLine(char b[3][3], int winLine[3]) {
     }
 
     // Diagonal (top right to bottom left)
-    if (b[0][2]!=' ' && b[0][2]==b[1][1] && b[1][1]==b[2][0]) {
+    if (b[0][2] != ' ' && b[0][2] == b[1][1] && b[1][1] == b[2][0]) {
         winLine[0] = 2;
         winLine[1] = 4;
         winLine[2] = 6;
