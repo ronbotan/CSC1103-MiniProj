@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include "gnuplot.h"
+#include "1P.h"
 
 #define HUMAN 'O'
 #define AI 'X'

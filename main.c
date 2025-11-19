@@ -1,7 +1,7 @@
 #include "2P.h"
 #include "1P.h"
-#include "single_player_knn.h"
 #include "scoreboard.c"
+#include "single_player_knn.h"
 
 #define scoreboard2P "scoreboard2P.txt"
 #define scoreboardEasy "scoreboardEasy.txt"

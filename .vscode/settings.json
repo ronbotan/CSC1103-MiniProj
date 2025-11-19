@@ -8,7 +8,6 @@
         "xhash": "c",
         "xmemory": "c",
         "xtree": "c",
-        "xutility": "c",
-        "cmath": "c"
+        "xutility": "c"
     }
 }
