@@ -21,7 +21,7 @@ static FILE *gp = NULL;
 int init_gnuplot(void)
 {
     if (gp != NULL) return 1; /* already open */
-    gp = _popen("gnuplot -persist", "w");
+    gp = _popen("gnuplot", "w");
     return gp != NULL;
 }
 
@@ -29,6 +29,8 @@ int init_gnuplot(void)
 void close_gnuplot(void)
 {
     if (gp) {
+        fprintf(gp, "exit\n");
+        fflush(gp);
         _pclose(gp);
         gp = NULL;
     }
