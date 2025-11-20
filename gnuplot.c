@@ -35,8 +35,16 @@ void close_gnuplot(void)
 }
 
 /* ---------- DRAW USING GNUPLOT ---------- */
-void draw(char board[3][3], char winner, int winLine[3])
+void draw(char board[3][3], char winner, int winLine[3], const char *title)
 {
+
+     // send title to gnuplot
+    if (title && title[0]) {
+        fprintf(gp, "set title \"%s\" font \"Arial,12\"\n", title);
+    } else {
+        fprintf(gp, "set title \"\"\n");
+    }
+
     if (!gp) return; /* nothing to draw to */
     fprintf(gp, "unset object\n");
     fprintf(gp, "unset arrow\n");
@@ -45,7 +53,7 @@ void draw(char board[3][3], char winner, int winLine[3])
         "unset key;"
         "set size square;"
         "set xrange [0:3];"
-        "set yrange [0:3];"
+        "set yrange [3:0];"
         "unset xtics;"
         "unset ytics;"
         "unset border;"

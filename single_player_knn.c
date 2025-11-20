@@ -35,9 +35,11 @@ char Run1PKnn(char board[3][3], const char* dataset_path) {
         return 'D';
     }
 
+    char title[120];
     char player = 'O'; // human first
+    snprintf(title, sizeof title, "Tic-Tac-Toe - 1P - Human's turn");
     while (1) {
-        draw(board, winner, winLine);
+        draw(board, winner, winLine, title);
 
         if (player == 'O') {
             int input;
@@ -72,20 +74,33 @@ char Run1PKnn(char board[3][3], const char* dataset_path) {
                 if (fallback != -1) move = fallback; // update the index we’ll report
             }
             board[r][c] = 'X';
+            snprintf(title, sizeof title, "Tic-Tac-Toe - 1P - AI moved");
             printf("AI plays %d\n", move);
         }
 
         if (checkWin(board, winLine)) {
             winner = player;
-            draw(board, winner, winLine);
+            if (winner == 'D') {
+                snprintf(title, sizeof title, "Tic-Tac-Toe - 1P - Draw");
+            } else if (winner == 'O') {
+                snprintf(title, sizeof title, "Tic-Tac-Toe - 1P - Human wins!");
+            } else {
+                snprintf(title, sizeof title, "Tic-Tac-Toe - 1P - AI wins!");
+            }
+            draw(board, winner, winLine, title);
             break;
         }
         if (checkFull(&board[0][0])) {
             winner = 'D';
-            draw(board, winner, winLine);
+            snprintf(title, sizeof title, "Tic-Tac-Toe - 1P - Draw");
+            draw(board, winner, winLine, title);
             break;
         }
         player = (player == 'O') ? 'X' : 'O';
+        if (player == 'O')
+            snprintf(title, sizeof title, "Tic-Tac-Toe - 1P - Human's turn");
+        else
+            snprintf(title, sizeof title, "Tic-Tac-Toe - 1P - AI's turn");
     }
 
     close_gnuplot();
