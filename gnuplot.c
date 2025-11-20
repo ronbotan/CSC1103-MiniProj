@@ -99,9 +99,8 @@ void draw(char board[3][3], char winner, int winLine[3])
     fflush(gp);
 }
 
-
-/* ---------- Utility ---------- /
-static void reset_board(void)
+/*
+void reset_board(void)
 {
     for (int r=0; r<3; r++)
         for (int c=0; c<3; c++)
@@ -109,5 +108,4 @@ static void reset_board(void)
 
     winner = EMPTY;
     winLine[0]=winLine[1]=winLine[2] = -1;
-    turn = 'O';
 }*/

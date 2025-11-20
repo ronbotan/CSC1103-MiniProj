@@ -1,1 +1,2 @@
-Ron 0 0 1
+Ron Tan	0	1	1
+AI Hard	0	1	1

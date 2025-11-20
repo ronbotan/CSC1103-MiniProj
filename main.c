@@ -14,22 +14,20 @@
 #define LABEL_HARD "Hard"
 
 int main() {
-    int mode;
     static char player1[20], player2[20];
     //Storing of values in a char array
-    char board[ROW][COLUMN] = {
-        {' ', ' ', ' '},
-        {' ', ' ', ' '},
-        {' ', ' ', ' '}
-    };
-
-    char* boardPtr = &board[0][0];
-    
     char player = 'O'; //Initialise first player as O
     int row, col, result = 0, play;
     char winner, loser;
     do {
         startLoop:
+        int mode = 0; //Assign mode to 0 after start loop. Ensures that mode is not a valid option on restart
+        char board[ROW][COLUMN] = { //
+        {' ', ' ', ' '},
+        {' ', ' ', ' '},
+        {' ', ' ', ' '}
+        };
+        char* boardPtr = &board[0][0];
         do{
             printf("\nSelect a Mode\n");
             printf("%-10s | %-5s\n", "Selection:", "Mode");
@@ -96,8 +94,10 @@ int main() {
             fflush(stdin); //Clear buffer after reading input
 
             //If else statement when the user input is valid. Other inputs will result in re-prompting for input
-            if (play == 1)
+            if (play == 1) {
                 goto startLoop; //If input = 1, go to the start of the main dowhile loop
+            }
+                
             else
                 return 0; //Return 0 ends the function main() and terminates the program
 

@@ -1,5 +1,2 @@
-Ron 5 0 5
-Tricia 1 0 1
-charmain 1 0 1
-AIEasy 0 0 1
-AI Easy 0 0 1
+Ron	3	0	3
+AI Easy	0	0	4

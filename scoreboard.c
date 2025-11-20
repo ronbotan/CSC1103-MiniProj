@@ -60,14 +60,23 @@ void updateScores(char winner, char player1[], char player2[],const char *label,
 int readScores(Players players[], int maxPlayers, char scoreboard[]) {
     FILE *fp = fopen(scoreboard, "r");
     if (fp == NULL) // No file of this name, break out
-        return 0; 
+        return 0;
 
     int count = 0;
-    while (count < maxPlayers && fscanf(fp, "%s %d %d %d",
-           players[count].name,
-           &players[count].win,
-           &players[count].draw,
-           &players[count].played) == 4) {count++;}
+    char line[256];
+    while (count < maxPlayers && fgets(line, sizeof(line), fp)) {
+        // Expect file lines as tab-separated: name\twin\tdraw\tplayed
+        // Name may contain spaces; we read up to 49 chars stopping at a tab.
+        int w, d, p;
+        if (sscanf(line, "%49[^\t]\t%d\t%d\t%d", players[count].name, &w, &d, &p) == 4) {
+            players[count].win = w;
+            players[count].draw = d;
+            players[count].played = p;
+            trim(players[count].name);
+            count++;
+        }
+        // Lines that do not match the tab-separated format are ignored.
+    }
     fclose(fp);
     return count;
 }
@@ -75,14 +84,15 @@ int readScores(Players players[], int maxPlayers, char scoreboard[]) {
 // Write all players back to file
 void saveScores(Players players[], int count, char scoreboard[]) {
     sort_by_wins_desc(players, count);
-    
+
     FILE *fp = fopen(scoreboard, "w");
     if (fp == NULL) {
         printf("Error writing scoreboard.\n");
         return;
     }
     for (int i = 0; i < count; i++) {
-        fprintf(fp, "%s %d %d %d\n",
+        // write as tab-separated so names can contain spaces
+        fprintf(fp, "%s\t%d\t%d\t%d\n",
             players[i].name,
             players[i].win,
             players[i].draw,
@@ -94,7 +104,7 @@ void saveScores(Players players[], int count, char scoreboard[]) {
 // Update or add a player’s score
 void updatePlayerScore(char *winnerName, char scoreboard[]) {
     Players players[MAXPLAYERS];
-    int count = readScores(players, 100, scoreboard);
+    int count = readScores(players, MAXPLAYERS, scoreboard);
 
     for (int i = 0; i < count; i++) {
         if (strcmp(players[i].name, winnerName) == 0) {
@@ -116,7 +126,7 @@ void updatePlayerScore(char *winnerName, char scoreboard[]) {
 
 void updateLoserScore(char *loserName, char scoreboard[]) {
     Players players[MAXPLAYERS];
-    int count = readScores(players, 100, scoreboard);
+    int count = readScores(players, MAXPLAYERS, scoreboard);
 
     for (int i = 0; i < count; i++) {
         if (strcmp(players[i].name, loserName) == 0) {
@@ -173,7 +183,7 @@ void updateDraw(char *player1, char *player2, char scoreboard[]) {
 
 void showScores(const char *label,char scoreboard[]) {
     Players players[MAXPLAYERS];
-    int count = readScores(players, 100, scoreboard);
+    int count = readScores(players, MAXPLAYERS, scoreboard);
 
     printf("\n  %s Current Scoreboard   \n", label);
     printf("%-20s | %-5s | %-5s | %-6s\n", "Name", "Wins", "Draws", "Games");
@@ -199,12 +209,16 @@ void trim(char *str) {
 
 void readName(char player[], char p) {
     printf("\nEnter name for Player %c: ", p);
-    fgets(player, 20, stdin); //fgets reads the entire string, allowing full names with spaces (e.g. Ron Tan)
-    trim(player); //Run the trim function after reading using fgets to get rid of \n character
+    /*
+     * We cannot determine the caller's buffer size from here (parameter decays to pointer),
+     * so read up to 49 characters which matches Players.name size and conventions used elsewhere.
+     */
+    fgets(player, 50, stdin); /* read up to 49 chars + NUL */
+    trim(player); /* remove trailing newline/CR and trailing spaces */
 }
 
 void swapRoles(char player1[], char player2[]) {
-    char temp[20]; //Temporary array to hold player 1
+    char temp[50]; //Temporary array to hold player 1 (support longer names)
     strcpy(temp, player1); //Store player 1 into a tempArray
     strcpy(player1, player2); //Move player 2 to player 1 position
     strcpy(player2, temp); //Move tempArray (player 1) to player 2
