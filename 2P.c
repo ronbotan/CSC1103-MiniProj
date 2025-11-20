@@ -11,9 +11,9 @@ int checkWin(char b[ROW][COLUMN], int winline[3]) {
             //If the condition fits, assign the winner using the value inside
             winner = b[r][0];
             //Assign the box number for winline. Used for draw function
-            winline[0] = (r*3+0);
-            winline[1] = (r*3+1);
-            winline[2] = (r*3+2);
+            winline[0] = (r*3+0); //current row position + 0 (first value)
+            winline[1] = (r*3+1); //current row position + 1 (second value)
+            winline[2] = (r*3+2); //current row position + 2 (third value)
             return winner;
         }
     }
@@ -24,9 +24,9 @@ int checkWin(char b[ROW][COLUMN], int winline[3]) {
             //If the condition fits, assign the winner using the value inside
             winner = b[0][c];
             //Assign the box number for winline. Used for draw function
-            winline[0] = (0*3+c);
-            winline[1] = (1*3+c);
-            winline[2] = (2*3+c);
+            winline[0] = (0*3+c); //row 0 + current column position
+            winline[1] = (1*3+c); //row 1 + current column position
+            winline[2] = (2*3+c); //row 2 + current column position
             return winner;
         }
     }
@@ -65,7 +65,7 @@ int checkFull(char* charPtr) {
 
 //2 Player Game to be run in main
 char Run2P(char board[][3], char* boardPtr, char player){
-    char winner, loser;
+    char winner, loser, charInput;
     int input, row, col, result;
     int move_number = 1;
     static int winLine[3] = {-1, -1, -1};
@@ -80,13 +80,16 @@ char Run2P(char board[][3], char* boardPtr, char player){
         char title[120];
         snprintf(title, sizeof title, "Tic-Tac-Toe - 2P - Player %c's turn - Move %d", player, move_number);
         draw(board, winner, winLine, title); //Call Draw function from GUI
-        fflush(stdin);
         printf("\nPlayer %c, select a box (1-9): ", player);
-        scanf("%d", &input);
-
-        // Validate input
-        if ((input < 1) || (input > 9)) {
-            printf("Invalid position. Try again.\n");
+        scanf("%c", &charInput);
+        getchar();
+        fflush(stdin);
+        
+        if(charInput >= '1' && charInput <= '9') 
+            input = charInput - '0'; //Convert char to int
+        else {
+            input = 0;
+            printf("\nInvalid input. Please enter a number between 1 and 9.\n");
             continue;
         }
 
@@ -95,7 +98,7 @@ char Run2P(char board[][3], char* boardPtr, char player){
         col = (input - 1) % 3;
 
         // Check if cell is empty
-        if (board[row][col] != ' ') {
+        if (board[row][col] != ' ' && input != 0) {
             printf("Cell already taken. Try again.\n");
             continue;
         }
@@ -108,7 +111,6 @@ char Run2P(char board[][3], char* boardPtr, char player){
         // Check for win
         result = checkWin(board, winLine);
         if (result){
-            printf("Player %c wins!\n", player);
             winner = player;
             snprintf(title, sizeof title, "Tic-Tac-Toe - 2P - Player %c wins!", player);
             draw(board, winner, winLine, title); //Call Draw function from GUI

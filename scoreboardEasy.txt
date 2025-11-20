@@ -1,4 +1,4 @@
-Ron	17	0	17
+Ron	16	0	16
 1	1	0	1
 shaun	1	0	1
-AI EASY	0	0	20
+AI EASY	0	0	19
