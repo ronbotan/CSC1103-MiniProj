@@ -1,2 +1,3 @@
-Ron	8	0	8
-AI Easy	0	0	9
+Ron	14	0	14
+1	1	0	1
+AI Easy	0	0	16

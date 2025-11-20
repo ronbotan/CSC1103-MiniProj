@@ -13,6 +13,17 @@ typedef struct Players{
     int played;
 } Players;
 
+void readName(char player[], char p);
+void trim(char *str);
+void showScores(const char *label, char scoreboard[]);
+void updateDraw(char *player1, char *player2, char scoreboard[]);
+void updateLoserScore(char *loserName, char scoreboard[]);
+void updatePlayerScore(char *winnerName, char scoreboard[]);
+void saveScores(Players players[], int count, char scoreboard[]);
+int readScores(Players players[], int maxPlayers, char scoreboard[]);
+void updateScores(char winner, char player1[], char player2[],const char *label, char scoreboard[]);
+void swapRoles(char player1[], char player2[]);
+
 static void sort_by_wins_desc(Players players[], int count) {
     for (int i = 0; i < count - 1; ++i) {
         int best = i;
@@ -28,17 +39,6 @@ static void sort_by_wins_desc(Players players[], int count) {
         }
     }
 }
-
-void readName(char player[], char p);
-void trim(char *str);
-void showScores(const char *label, char scoreboard[]);
-void updateDraw(char *player1, char *player2, char scoreboard[]);
-void updateLoserScore(char *loserName, char scoreboard[]);
-void updatePlayerScore(char *winnerName, char scoreboard[]);
-void saveScores(Players players[], int count, char scoreboard[]);
-int readScores(Players players[], int maxPlayers, char scoreboard[]);
-void updateScores(char winner, char player1[], char player2[],const char *label, char scoreboard[]);
-void swapRoles(char player1[], char player2[]);
 
 void updateScores(char winner, char player1[], char player2[],const char *label, char scoreboard[]) {
     if (winner == 'O') { //Player 1 win
@@ -186,10 +186,10 @@ void showScores(const char *label,char scoreboard[]) {
     int count = readScores(players, MAXPLAYERS, scoreboard);
 
     printf("\n  %s Current Scoreboard   \n", label);
-    printf("%-20s | %-5s | %-5s | %-6s\n", "Name", "Wins", "Draws", "Games");
+    printf("%-30s | %-5s | %-5s | %-6s\n", "Name", "Wins", "Draws", "Games");
     printf("-----------------------------------\n");
     for (int i = 0; i < count; i++) {
-        printf("%-20s | %-5d | %-5d | %-6d\n",
+        printf("%-30s | %-5d | %-5d | %-6d\n",
             players[i].name,
             players[i].win,
             players[i].draw,
