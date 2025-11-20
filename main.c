@@ -58,24 +58,22 @@ int main()
         updateScores(winner, player1, player2, LABEL_2P, scoreboard2P); // Update the scoreboard for the winner. O = P1, X = P2, D = DRAW
         break;
 
-    case (2): // Run 1 player easy mode
+    case (2): // Run 1 player easy mode (MiniMax)
         readName(player1, 'O');
-        strcpy(player2, "AI Easy");
         winner = Run1P(board, 2);
-        updateScores(winner, player1, player2, LABEL_EASY, scoreboardEasy);
+        updateScores(winner, player1, "AI EASY", LABEL_EASY, scoreboardEasy);
         break;
 
-    case (3): // Run 1 player normal mode (CHARMAIN TAN JIA YI)
+    case (3): // Run 1 player normal mode (ML Algorithm)
         readName(player1, 'O');
         winner = Run1PKnn(board, "KNN/bestmoves.csv");
-        updateScores(winner, player1, "AI", LABEL_NORMAL, scoreboardNormal);
+        updateScores(winner, player1, "AI NORMAL", LABEL_NORMAL, scoreboardNormal);
         break;
 
-    case (4): // Run 1 player hard mode
+    case (4): // Run 1 player hard mode (MiniMax)
         readName(player1, 'O');
-        strcpy(player2, "AI Hard");
         winner = Run1P(board, 4);
-        updateScores(winner, player1, player2, LABEL_HARD, scoreboardHard);
+        updateScores(winner, player1, "AI HARD", LABEL_HARD, scoreboardHard);
         break;
 
     case (5):
@@ -85,7 +83,7 @@ int main()
         showScores(LABEL_HARD, scoreboardHard);
         showScores(LABEL_2P, scoreboard2P);
         goto startLoop;
-
+    
     default:
         printf("\nInvalid mode. Please try again.");
     }
@@ -106,5 +104,4 @@ int main()
             printf("\nInvalid input. Please try again."); //Prompt user of invalid input
 
     } while (play != '1' || play != '0');
-    return 0;
 }

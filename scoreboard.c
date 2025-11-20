@@ -15,13 +15,13 @@ typedef struct Players{
 
 void readName(char player[], char p);
 void trim(char *str);
-void showScores(const char *label, char scoreboard[]);
+void showScores(char label[], char scoreboard[]);
 void updateDraw(char *player1, char *player2, char scoreboard[]);
 void updateLoserScore(char *loserName, char scoreboard[]);
 void updatePlayerScore(char *winnerName, char scoreboard[]);
 void saveScores(Players players[], int count, char scoreboard[]);
 int readScores(Players players[], int maxPlayers, char scoreboard[]);
-void updateScores(char winner, char player1[], char player2[],const char *label, char scoreboard[]);
+void updateScores(char winner, char player1[], char player2[], char label[], char scoreboard[]);
 void swapRoles(char player1[], char player2[]);
 
 static void sort_by_wins_desc(Players players[], int count) {
@@ -40,7 +40,7 @@ static void sort_by_wins_desc(Players players[], int count) {
     }
 }
 
-void updateScores(char winner, char player1[], char player2[],const char *label, char scoreboard[]) {
+void updateScores(char winner, char player1[], char player2[], char label[], char scoreboard[]) {
     if (winner == 'O') { //Player 1 win
         updatePlayerScore(player1, scoreboard);
         updateLoserScore(player2, scoreboard);
@@ -181,7 +181,7 @@ void updateDraw(char *player1, char *player2, char scoreboard[]) {
     saveScores(players, count, scoreboard);
 }
 
-void showScores(const char *label,char scoreboard[]) {
+void showScores(char label[], char scoreboard[]) {
     Players players[MAXPLAYERS];
     int count = readScores(players, MAXPLAYERS, scoreboard);
 
