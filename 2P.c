@@ -67,6 +67,7 @@ int checkFull(char* charPtr) {
 char Run2P(char board[][3], char* boardPtr, char player){
     char winner, loser;
     int input, row, col, result;
+    int move_number = 1;
     static int winLine[3] = {-1, -1, -1};
 
     if (!init_gnuplot()) {
@@ -76,7 +77,9 @@ char Run2P(char board[][3], char* boardPtr, char player){
 
     while (1)
     {
-        draw(board, winner, winLine); //Call Draw function from GUI
+        char title[120];
+        snprintf(title, sizeof title, "Tic-Tac-Toe - 2P - Player %c's turn - Move %d", player, move_number);
+        draw(board, winner, winLine, title); //Call Draw function from GUI
         fflush(stdin);
         printf("\nPlayer %c, select a box (1-9): ", player);
         scanf("%d", &input);
@@ -99,24 +102,27 @@ char Run2P(char board[][3], char* boardPtr, char player){
 
         // Make move
         board[row][col] = player;
-        draw(board, winner, winLine);
+        snprintf(title, sizeof title, "Tic-Tac-Toe - 2P - Player %c moved - Move %d", player, move_number);
+        draw(board, winner, winLine, title);
 
         // Check for win
         result = checkWin(board, winLine);
         if (result){
             printf("Player %c wins!\n", player);
             winner = player;
-            draw(board, winner, winLine); //Call Draw function from GUI
+            snprintf(title, sizeof title, "Tic-Tac-Toe - 2P - Player %c wins!", player);
+            draw(board, winner, winLine, title); //Call Draw function from GUI
             loser = (player == 'O') ? 'X' : 'O';
             break;
         }
         else if (checkFull(boardPtr)) { // Check for draw
             printf("It's a draw!\n");
             winner = 'D';
-            draw(board, winner, winLine); //Call Draw function from GUI
+            draw(board, winner, winLine, "Tic-Tac-Toe - 2P - Draw"); //Call Draw function from GUI
             break;
         }
-        // If player==O is true player becomes X. Else if player==O is false, player becomes O
+        // advance to next move / player
+        move_number++;
         player = (player == 'O') ? 'X' : 'O';
     }
     close_gnuplot();

@@ -10,6 +10,6 @@ extern int winLine[3];
 
 int  init_gnuplot(void);
 void close_gnuplot(void);
-void draw(char board[ROW][COLUMN], char winner, int winLine[3]);
+void draw(char board[ROW][COLUMN], char winner, int winLine[3], const char *title);
 
 #endif
