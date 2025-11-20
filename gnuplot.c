@@ -29,6 +29,7 @@ int init_gnuplot(void)
 void close_gnuplot(void)
 {
     if (gp) {
+        fprintf(gp, "pause 3\n");
         fprintf(gp, "exit\n");
         fflush(gp);
         _pclose(gp);
@@ -115,14 +116,3 @@ void draw(char board[3][3], char winner, int winLine[3], const char *title)
     fprintf(gp, "plot NaN notitle\n");
     fflush(gp);
 }
-
-/*
-void reset_board(void)
-{
-    for (int r=0; r<3; r++)
-        for (int c=0; c<3; c++)
-            board[r][c] = EMPTY;
-
-    winner = EMPTY;
-    winLine[0]=winLine[1]=winLine[2] = -1;
-}*/
