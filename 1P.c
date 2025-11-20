@@ -35,7 +35,10 @@ char Run1P(char board[3][3], int difficulty)
         return 'D';
     }
 
-    draw(board, winner, winLine);     // initial board
+    const char *mode_str = (difficulty == 4) ? "Hard" : (difficulty == 2) ? "Easy" : "Custom";
+    char title[120];
+    snprintf(title, sizeof title, "Tic-Tac-Toe - 1P (%s) - Human's turn", mode_str);
+    draw(board, winner, winLine, title);     // initial board
 
     while (1) {
 
@@ -47,14 +50,16 @@ char Run1P(char board[3][3], int difficulty)
         if (result == 1) {                    // If result return 1
             winner = HUMAN;                   // Means winner is human
             getWinLine(board, winLine);       // Find the final winning cells
-            draw(board, winner, winLine);     // Draw the winning line
+            snprintf(title, sizeof title, "Tic-Tac-Toe - 1P (%s) - Human wins!", mode_str);
+            draw(board, winner, winLine, title);     // Draw the winning line
             printf("\nYou Win!\n");
             break;
         }
 
         if (!hasEmpty(board)) {               // No empty cells means draw
             winner = 'D';
-            draw(board, winner, winLine);
+            snprintf(title, sizeof title, "Tic-Tac-Toe - 1P (%s) - Draw", mode_str);
+            draw(board, winner, winLine, title);
             printf("\n It's a Draw!\n");
             break;
         }
@@ -68,19 +73,22 @@ char Run1P(char board[3][3], int difficulty)
         if (result == 2) {                    // If result is 2
             winner = AI;                      // Means winner is AI
             getWinLine(board, winLine);       // Find the final winning cells
-            draw(board, winner, winLine);     // Draw winning line
+            snprintf(title, sizeof title, "Tic-Tac-Toe - 1P (%s) - AI wins!", mode_str);
+            draw(board, winner, winLine, title);     // Draw winning line
             printf("\nAI Wins!\n");          
             break;
         }
 
         if (!hasEmpty(board)) {
             winner = 'D';
-            draw(board, winner, winLine);
+            snprintf(title, sizeof title, "Tic-Tac-Toe - 1P (%s) - Draw", mode_str);
+            draw(board, winner, winLine, title);
             printf("\n It's a Draw!\n");
             break;
         }
 
-        draw(board, winner, winLine);
+        snprintf(title, sizeof title, "Tic-Tac-Toe - 1P (%s) - Human's turn", mode_str);
+        draw(board, winner, winLine, title);     // Update board after both moves
     }
 
     // Close gnuplot window

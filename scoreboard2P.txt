@@ -1,9 +1,15 @@
+<<<<<<< HEAD
+Ron	1	0	1
+Ron Tan	1	0	1
+Shaun	0	0	1
+Hoon Chi Peng Sshaun	0	0	1
+=======
 char 2 0 2
-Lawrence 1 0 1
+shaun 2 0 2
 Shaun 1 0 1
-charmain 1 0 2
-o 1 0 1
+Lawrence 1 0 1
+main 0 0 2
 Ron 0 0 1
 CaoQi 0 0 1
-tan 0 0 1
-main 0 0 2
+ron 0 0 2
+>>>>>>> shaun
