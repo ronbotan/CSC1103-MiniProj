@@ -48,6 +48,7 @@ void draw(char board[3][3], char winner, int winLine[3], const char *title)
     if (!gp) return; /* nothing to draw to */
     fprintf(gp, "unset object\n");
     fprintf(gp, "unset arrow\n");
+    fprintf(gp, "unset label\n");
 
     fprintf(gp,
         "unset key;"
@@ -70,6 +71,12 @@ void draw(char board[3][3], char winner, int winLine[3], const char *title)
         int c = i%3;
         double x = c + 0.5;
         double y = r + 0.5;
+        int cellNumber = i + 1;
+
+        // Label each box in its top-left corner
+        fprintf(gp,
+            "set label \"%d\" at %f,%f front font \"Arial,10\" tc rgb 0x666666\n",
+            cellNumber, x - 0.35, y - 0.35);
 
         if (board[r][c] == 'X') {
             fprintf(gp, "set arrow from %f-0.3,%f-0.3 to %f+0.3,%f+0.3 nohead lw 6 lc rgb 0xFF0000\n", x,y,x,y);

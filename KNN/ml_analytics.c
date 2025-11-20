@@ -3,6 +3,7 @@
 #include <string.h>
 #include <math.h>
 #include <time.h>
+// #include <1P.h>
 
 #define K 5
 #define MAX_LINE_LEN 1024
@@ -23,6 +24,7 @@ typedef struct {
 DataPoint* load_dataset(const char* filename, int* num_records);
 void shuffle_dataset(DataPoint* dataset, int n);
 int predict_knn(DataPoint* train_set, int train_size, int new_board[9]);
+static void print_results(const char *label, int correct, int total, int time);
 
 // --- Main Program ---
 int main(void) {
@@ -50,16 +52,30 @@ int main(void) {
     printf("\n--- Starting Model Evaluation ---\n");
     fflush(stdout); // <<-- ADDED: Flush buffer before starting the loop
 
-    int correct_predictions = 0;
+    int correct_prediction_knn = 0, correct_prediction_perfect = 0, correct_prediction_imperfect = 0;
+    double time_knn = 0, time_perfect = 0, time_imperfect = 0;
+
     for (int i = 0; i < test_size; i++) {
         int* current_test_board = test_set[i].board;
         int true_best_move = test_set[i].best_move;
 
-        int predicted_move = predict_knn(train_set, train_size, current_test_board);
-        
-        if (predicted_move == true_best_move) {
-            correct_predictions++;
-        }
+        clock_t start = clock();
+        int knn_move = predict_knn(train_set, train_size, current_test_board);
+        time_knn += clock() - start;
+        if (knn_move == true_best_move) correct_prediction_knn++;
+
+        //Jane add your minimax logic, 80 train, 20 test
+        // start = clock();
+        // -------- add here ----------
+        // time_perfect += clock() - start;
+        // if (perfect_move == true_best_move) correct_prediction_perfect++;
+
+        //Jane add your imperfect minimax logic, 80 train, 20 test
+        // start = clock();
+        // //variable = method
+        // time_imperfect += clock() - start;
+        // if (variableName == true_best_move) correct_prediction_imperfect++;
+
 
         // MODIFIED: Added spaces at the end to ensure the line is fully overwritten
         printf("Testing item %d / %d...  ", i + 1, test_size);
@@ -67,14 +83,12 @@ int main(void) {
         fflush(stdout);
     }
     printf("\nEvaluation complete.\n");
-
     // 5. Calculate and display accuracy
-    double accuracy = (double)correct_predictions / test_size * 100.0;
-    printf("\n--- Evaluation Results ---\n");
-    printf("Total test items:    %d\n", test_size);
-    printf("Correct predictions: %d\n", correct_predictions);
-    printf("Model Accuracy:      %.2f%%\n", accuracy);
-    printf("--------------------------\n");
+    print_results("KNN",correct_prediction_knn,test_size,time_knn);
+    // print_results("Perfect",   correct_prediction_perfect,   test_size);
+    // print_results("Imperfect", correct_prediction_imperfect, test_size);
+    
+    
 
     // 6. Clean up
     free(all_data);
@@ -176,4 +190,15 @@ DataPoint* load_dataset(const char* filename, int* num_records) {
 
     fclose(file);
     return dataset;
+}
+
+static void print_results(const char *label, int correct, int total,int time) {
+    double accuracy = total ? (double)correct / total * 100.0 : 0.0;
+    double avg_ms = total ? (time / CLOCKS_PER_SEC) * 1000.0 / total : 0.0;
+    printf("\n--- %s Evaluation ---\n", label);
+    printf("Total test items:    %d\n", total);
+    printf("Correct predictions: %d\n", correct);
+    printf("Model Accuracy:      %.2f%%\n", accuracy);
+    printf("Model Time Performance:      %.2f%%\n", time);
+    printf("--------------------------\n");
 }
