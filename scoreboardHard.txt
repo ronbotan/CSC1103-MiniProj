@@ -1,3 +1,4 @@
 AI Hard	7	1	8
 Ron Tan	0	1	2
-Ron	0	0	6
+Ron	0	1	7
+AI HARD	0	1	1

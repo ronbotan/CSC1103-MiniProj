@@ -1,0 +1,2 @@
+Ron	2	0	2
+AI NORMAL	0	0	2
