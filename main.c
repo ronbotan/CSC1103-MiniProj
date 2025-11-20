@@ -92,14 +92,18 @@ int main() {
             printf("\nDo you want to play again? (1 = Yes, 0 = No): "); //Check if user wants to play again
             scanf("%d", &play); //Store input to variable. If input = 1, player again, else exit
             fflush(stdin); //Clear buffer after reading input
+            getchar();
 
             //If else statement when the user input is valid. Other inputs will result in re-prompting for input
-            if (play == 1) {
+            if (play == 1)
                 goto startLoop; //If input = 1, go to the start of the main dowhile loop
-            }
                 
-            else
+            else if (play == 0)
                 return 0; //Return 0 ends the function main() and terminates the program
+            
+            else
+                printf("\nInvalid input. Please try again."); //Prompt user of invalid input
+                
 
         } while (play != 1 || play != 0);
         
