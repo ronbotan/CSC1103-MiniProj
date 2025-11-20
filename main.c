@@ -1,7 +1,7 @@
 #include "2P.h"
 #include "1P.h"
 #include "scoreboard.c"
-#include "single_player_knn.h"
+#include "ML1P.h"
 
 #define scoreboard2P "scoreboard2P.txt"
 #define scoreboardEasy "scoreboardEasy.txt"
@@ -29,7 +29,7 @@ int main() {
     int row, col, result = 0, play;
     char winner, loser;
     do {
-        startloop:
+        startLoop:
         do{
             printf("\nSelect a Mode\n");
             printf("%-10s | %-5s\n", "Selection:", "Mode");
@@ -84,7 +84,7 @@ int main() {
                 showScores(LABEL_NORMAL,scoreboardNormal);
                 showScores(LABEL_HARD,scoreboardHard);
                 showScores(LABEL_2P,scoreboard2P);
-                goto startloop;
+                goto startLoop;
 
             default:
                 printf("\nInvalid mode. Please try again.");
@@ -93,11 +93,17 @@ int main() {
         do { //Using of dowhile loop to check user input validity.
             printf("\nDo you want to play again? (1 = Yes, 0 = No): "); //Check if user wants to play again
             scanf("%d", &play); //Store input to variable. If input = 1, player again, else exit
+            fflush(stdin); //Clear buffer after reading input
+
+            //If else statement when the user input is valid. Other inputs will result in re-prompting for input
+            if (play == 1)
+                goto startLoop; //If input = 1, go to the start of the main dowhile loop
+            else
+                return 0; //Return 0 ends the function main() and terminates the program
+
         } while (play != 1 || play != 0);
         
     } while (play != 0);
-
-
     
     return 0;
 }

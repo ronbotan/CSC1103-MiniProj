@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "knn.h"
+#include "ML.h"
 #include "gnuplot.h"        // reuse existing draw/init/check helpers
 #include "2P.h"             // for checkWin/checkFull if not in a header
 

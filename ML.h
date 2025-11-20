@@ -1,5 +1,5 @@
-#ifndef KNN_H
-#define KNN_H
+#ifndef ML1P_H
+#define ML1P_H
 
 #define KNN_K 5
 #define KNN_MAX_LINE 256
