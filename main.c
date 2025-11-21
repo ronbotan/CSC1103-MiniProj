@@ -47,7 +47,7 @@ int main()
 
     switch (mode) {
     case (1): // Run 2 player mode
-        if (play == '0') 
+        if (play == '1') 
             swapRoles(player1, player2);
 
         else {

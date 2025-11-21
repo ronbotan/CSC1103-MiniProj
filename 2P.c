@@ -65,7 +65,7 @@ int checkFull(char* charPtr) {
 
 //2 Player Game to be run in main
 char Run2P(char board[][3], char* boardPtr, char player){
-    char winner, loser, charInput;
+    char winner, loser;
     int input, row, col, result;
     int move_number = 1;
     static int winLine[3] = {-1, -1, -1};
@@ -81,15 +81,10 @@ char Run2P(char board[][3], char* boardPtr, char player){
         snprintf(title, sizeof title, "Tic-Tac-Toe - 2P - Player %c's turn - Move %d", player, move_number);
         draw(board, winner, winLine, title); //Call Draw function from GUI
         printf("\nPlayer %c, select a box (1-9): ", player);
-        scanf("%c", &charInput);
-        getchar();
-        fflush(stdin);
         
-        if(charInput >= '1' && charInput <= '9') 
-            input = charInput - '0'; //Convert char to int
-        else {
-            input = 0;
-            printf("\nInvalid input. Please enter a number between 1 and 9.\n");
+        if (scanf("%d", &input) != 1 || input < 1 || input > 9) {    
+            printf("Invalid input! Please enter a number between 1 and 9.\n");
+            while(getchar()!='\n');
             continue;
         }
 
