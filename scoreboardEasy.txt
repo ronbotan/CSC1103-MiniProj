@@ -1,4 +1,5 @@
 Ron	16	0	16
 1	1	0	1
 shaun	1	0	1
-AI EASY	0	0	19
+j	1	0	1
+AI EASY	0	1	22

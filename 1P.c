@@ -1,16 +1,15 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
 #include "gnuplot.h"
 #include "1P.h"
+#include "2P.h"
 
 #define HUMAN 'O'
 #define AI 'X'
 
-/* 1 Player Mode */
-/* Difficulty = 2 --> Easy (HUman must win) */
-/* Difficulty = 4 --> Hard (HUman must lose) */
-char Run1P(char board[3][3], int difficulty)
+// 1 Player Mode 
+// Difficulty = 2 --> Easy (HUman must win) 
+// Difficulty = 4 --> Hard (HUman must lose)
+char Run1P(char board[3][3], char* boardPtr, int difficulty)
 {
     // Store game outcome
     int result = 0;
@@ -26,15 +25,13 @@ char Run1P(char board[3][3], int difficulty)
         }
     }
 
-    // Seed the random number generator (used inside minimax if needed)
-    srand((unsigned)time(NULL));
-
     // If gnuplot failed to open, return draw as safe fallback
     if (!init_gnuplot()) {
         printf("Error: gnuplot could not start.\n");
         return 'D';
     }
 
+    // Display the tile on board
     const char *mode_str = (difficulty == 4) ? "Hard" : (difficulty == 2) ? "Easy" : "Custom";
     char title[120];
     snprintf(title, sizeof title, "Tic-Tac-Toe - 1P (%s) - Human's turn", mode_str);
@@ -45,18 +42,17 @@ char Run1P(char board[3][3], int difficulty)
         // Human Move
         humanTurn(board);
 
-        result = whoWins(board);              // Check if human moved 3 in a row
+        result = checkWin(board, winLine);           // Check if human moved 3 in a row
 
-        if (result == 1) {                    // If result return 1
-            winner = HUMAN;                   // Means winner is human
-            getWinLine(board, winLine);       // Find the final winning cells
-            snprintf(title, sizeof title, "Tic-Tac-Toe - 1P (%s) - Human wins!", mode_str);
+        if (result == HUMAN) {                       
+            winner = HUMAN;                          
+            snprintf(title, sizeof title, "Tic-Tac-Toe - 1P (%s) - Human wins!", mode_str);   // Display win message
             draw(board, winner, winLine, title);     // Draw the winning line
             printf("\nYou Win!\n");
             break;
         }
 
-        if (!hasEmpty(board)) {               // No empty cells means draw
+        if (checkFull(boardPtr)) {               // No empty cells means draw
             winner = 'D';
             snprintf(title, sizeof title, "Tic-Tac-Toe - 1P (%s) - Draw", mode_str);
             draw(board, winner, winLine, title);
@@ -68,18 +64,17 @@ char Run1P(char board[3][3], int difficulty)
         // AI Move
         aiTurn(board, difficulty);            
 
-        result = whoWins(board);              // Check if AI move 3 in a row
+        result = checkWin(board, winLine);    // Check if AI move 3 in a row
 
-        if (result == 2) {                    // If result is 2
-            winner = AI;                      // Means winner is AI
-            getWinLine(board, winLine);       // Find the final winning cells
-            snprintf(title, sizeof title, "Tic-Tac-Toe - 1P (%s) - AI wins!", mode_str);
+        if (result == AI) {                    
+            winner = AI;                      
+            snprintf(title, sizeof title, "Tic-Tac-Toe - 1P (%s) - AI wins!", mode_str);   // Display win message
             draw(board, winner, winLine, title);     // Draw winning line
             printf("\nAI Wins!\n");          
             break;
         }
 
-        if (!hasEmpty(board)) {
+        if (checkFull(boardPtr)) {
             winner = 'D';
             snprintf(title, sizeof title, "Tic-Tac-Toe - 1P (%s) - Draw", mode_str);
             draw(board, winner, winLine, title);
@@ -95,12 +90,12 @@ char Run1P(char board[3][3], int difficulty)
     close_gnuplot();
 
     // Human wins
-    if (result == 1) {
+    if (result == HUMAN) {
         return HUMAN;
     }   
 
     // AI wins
-    else if (result == 2) {
+    else if (result == AI) {
         return AI;
     }  
     
@@ -112,68 +107,28 @@ char Run1P(char board[3][3], int difficulty)
     
 }
 
-// Check if any empty spot exists
-int hasEmpty(char b[3][3]) {
-    for (int r=0 ; r<3 ; r++)          // Loop through every row
-        for (int c=0 ; c<3 ; c++)      // Loop through every column
-            if (b[r][c] == ' ') {      // If the spot is blank
-                return 1;              // At least one empty spot exists
-            }
-    return 0;                          // No empty spot
-}
-
-// Check who currently win
-/*
-   Returns:
-   1 = Player win
-   2 = AI win
-   0 = Draw (no winner)
-*/
-int whoWins(char b[3][3]) {
-
-    for (int i=0 ; i<3 ; i++) {
-
-        // Check each row
-        if (b[i][0] != ' ' && b[i][0] == b[i][1] && b[i][1] == b[i][2]) {
-            return (b[i][0]==HUMAN) ? 1 : 2;
-        }
-
-        // Check each column
-        if (b[0][i] != ' ' && b[0][i] == b[1][i] && b[1][i] == b[2][i]) {
-            return (b[0][i]==HUMAN) ? 1 : 2;
-        }
-    }
-
-    // Check diagonal (top left to bottom right)
-    if (b[0][0] != ' ' && b[0][0] == b[1][1] && b[1][1] == b[2][2]) {
-        return (b[0][0]==HUMAN) ? 1 : 2;
-    }
-
-    // Check diagonal (top right to bottom left)
-    if (b[0][2] != ' ' && b[0][2] == b[1][1] && b[1][1] == b[2][0]) {
-        return (b[0][2]==HUMAN) ? 1 : 2;
-    }
-
-    // No winner yet
-    return 0;   
-}
-
 // Recursively tries all possible moves for AI and human
 // Determine who has the greater chance of wining
 int minimaxLogic(char b[3][3], int isAITurn) {
 
     // Check if currently have winner
-    int winner = whoWins(b);
+    int winLine[3] = {-1,-1,-1};
+    int winner = checkWin(b, winLine);
 
     // If a winner is found, direct return winner
-    if (winner != 0) {
-        return winner;
+    if (winner == HUMAN) {
+        return 1;
+    }
+    else if (winner == AI) {
+        return 2;
     }
 
     // No more empty spot and no winner means draw
-    if (!hasEmpty(b)) {
-        return 3; 
-    } 
+    char *ptr = (char*)b;
+
+    if (checkFull(ptr)) {
+        return 3;
+    }
 
     // AI turn
     if (isAITurn == 1) {
@@ -295,7 +250,7 @@ void aiTurn(char b[3][3], int mode) {
                 if (b[r][c] == ' ') {
                     char temp = b[r][c];                 
                     b[r][c] = AI;                        // Temporary put AI at empty spot
-                    int result = minimaxLogic(b, 0);    // Evaluate move outcome using minimax
+                    int result = minimaxLogic(b, 0);     // Evaluate move outcome using minimax
                     b[r][c] = ' ';                       // Set cell back to empty
 
                     // AI can win
@@ -374,8 +329,8 @@ void aiTurn(char b[3][3], int mode) {
     b[bestRow][bestCol] = AI;
 }
 
-// Draw winning line
-void getWinLine(char b[3][3], int winLine[3]) {
+// Repeated functions as 2P.c
+/*void getWinLine(char b[3][3], int winLine[3]) {
 
     // Rows
     for (int r=0; r<3; r++) {
@@ -416,3 +371,42 @@ void getWinLine(char b[3][3], int winLine[3]) {
     // No win
     winLine[0] = winLine[1] = winLine[2] = -1;
 }
+    
+// Check if any empty spot exists
+int hasEmpty(char b[3][3]) {
+    for (int r=0 ; r<3 ; r++)          // Loop through every row
+        for (int c=0 ; c<3 ; c++)      // Loop through every column
+            if (b[r][c] == ' ') {      // If the spot is blank
+                return 1;              // At least one empty spot exists
+            }
+    return 0;                          // No empty spot
+}
+    
+int whoWins(char b[3][3]) {
+
+    for (int i=0 ; i<3 ; i++) {
+
+        // Check each row
+        if (b[i][0] != ' ' && b[i][0] == b[i][1] && b[i][1] == b[i][2]) {
+            return (b[i][0]==HUMAN) ? 1 : 2;
+        }
+
+        // Check each column
+        if (b[0][i] != ' ' && b[0][i] == b[1][i] && b[1][i] == b[2][i]) {
+            return (b[0][i]==HUMAN) ? 1 : 2;
+        }
+    }
+
+    // Check diagonal (top left to bottom right)
+    if (b[0][0] != ' ' && b[0][0] == b[1][1] && b[1][1] == b[2][2]) {
+        return (b[0][0]==HUMAN) ? 1 : 2;
+    }
+
+    // Check diagonal (top right to bottom left)
+    if (b[0][2] != ' ' && b[0][2] == b[1][1] && b[1][1] == b[2][0]) {
+        return (b[0][2]==HUMAN) ? 1 : 2;
+    }
+
+    // No winner yet
+    return 0;   
+}*/

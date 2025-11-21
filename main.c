@@ -38,11 +38,12 @@ int main()
         printf("%-10s | %-10s\n", "3:", "1 Player Normal");
         printf("%-10s | %-10s\n", "4:", "1 Player Hard");
         printf("%-10s | %-10s\n", "5:", "View Scoreboard");
+        printf("%-10s | %-10s\n", "6:", "Exit");
         printf("Selection: ");
         scanf("%d", &mode);
         getchar(); // Clearing of input buffer
         /* code */
-    } while ((mode < 1) || (mode > 5));
+    } while ((mode < 1) || (mode > 6));
 
     switch (mode) {
     case (1): // Run 2 player mode
@@ -60,7 +61,7 @@ int main()
 
     case (2): // Run 1 player easy mode (MiniMax)
         readName(player1, 'O');
-        winner = Run1P(board, 2);
+        winner = Run1P(board, boardPtr, 2);
         updateScores(winner, player1, "AI EASY", LABEL_EASY, scoreboardEasy);
         break;
 
@@ -72,7 +73,7 @@ int main()
 
     case (4): // Run 1 player hard mode (MiniMax)
         readName(player1, 'O');
-        winner = Run1P(board, 4);
+        winner = Run1P(board, boardPtr, 4);
         updateScores(winner, player1, "AI HARD", LABEL_HARD, scoreboardHard);
         break;
 
@@ -83,6 +84,10 @@ int main()
         showScores(LABEL_HARD, scoreboardHard);
         showScores(LABEL_2P, scoreboard2P);
         goto startLoop;
+
+    case(6):
+        printf("\nGoodbye!\n");
+        return 0;
     
     default:
         printf("\nInvalid mode. Please try again.");
@@ -98,7 +103,7 @@ int main()
         //If else statement when the user input is valid. Other inputs will result in re-prompting for input
         if (play == '1')
             goto startLoop; //If input = 1, go to the start of the main dowhile loop
-        else if (play == '0')
+        else if (play == '0') 
             return 0; //Return 0 ends the function main() and terminates the program
         else
             printf("\nInvalid input. Please try again."); //Prompt user of invalid input
