@@ -233,7 +233,7 @@ void humanTurn(char b[3][3]) {
 }
 
 /* ---------- AI move (Easy/Hard) ---------- */
-void aiTurn(char b[3][3], int mode) {
+int aiTurn(char b[3][3], int mode) {
     int bestRow = -1, bestCol = -1;
 
     // Hard: Human must lose
@@ -327,6 +327,9 @@ void aiTurn(char b[3][3], int mode) {
 
     // Place AI symbol in the chosen spot
     b[bestRow][bestCol] = AI;
+
+    int moveIndex = bestRow * 3 + bestCol + 1;
+    return moveIndex;
 }
 
 // Repeated functions as 2P.c

@@ -9,6 +9,11 @@ typedef struct {
     int best_move;     // 1..9
 } DataPoint;
 
+typedef struct {
+    double distance;
+    int best_move;
+} Neighbor;
+
 DataPoint* knn_load_dataset(const char* filename, int* out_count);
 void       knn_free_dataset(DataPoint* data);
 int        knn_predict_move(const DataPoint* data, int count,

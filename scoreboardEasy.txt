@@ -2,4 +2,5 @@ Ron	16	0	16
 1	1	0	1
 shaun	1	0	1
 j	1	0	1
-AI EASY	0	1	22
+charmain	1	0	1
+AI EASY	0	1	23

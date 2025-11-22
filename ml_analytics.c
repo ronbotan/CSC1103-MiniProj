@@ -4,23 +4,34 @@
 #include <math.h>
 #include <time.h>
 #include "ML.h"
-// #include <1P.h>
+#include "1P.h"
 
 #define K 5
 #define MAX_LINE_LEN 1024
 #define TRAIN_SPLIT 0.8
 
-
-typedef struct {
-    double distance;
-    int best_move;
-} Neighbor;
+typedef enum {
+    PLAYER_MINIMAX_PERFECT,
+    PLAYER_MINIMAX_IMPERFECT,
+    PLAYER_KNN
+} PlayerType;
 
 // --- Forward Declarations ---
 // DataPoint* knn_load_dataset(const char* filename, int* num_records);
 void shuffle_dataset(DataPoint* dataset, int n);
 int predict_knn(DataPoint* train_set, int train_size, int new_board[9]);
+int minimax_prediction(const int board9[9], int mode);
 static void print_results(const char *label, int correct, int total, int time);
+
+
+int minimax_prediction_player(const int board9[9], int mode, int player);
+int check_win_intboard(const int board9[9], int player);
+int board_full_int(const int board9[9]);
+int choose_move(PlayerType type, int current_player,
+                const int board9[9], DataPoint* train_set, int train_size);
+char simulate_game(PlayerType playerX, PlayerType playerO,
+                   DataPoint* train_set, int train_size);
+void simulate_matchups(DataPoint* train_set, int train_size, int num_games);
 
 // --- Main Program ---
 int main(void) {
@@ -58,19 +69,19 @@ int main(void) {
         clock_t start = clock();
         int knn_move = predict_knn(train_set, train_size, current_test_board);
         time_knn += clock() - start;
-        if (knn_move == true_best_move) correct_prediction_knn++;
+        if (knn_move == true_best_move) 
+        correct_prediction_knn++;
 
         //Jane add your minimax logic, 80 train, 20 test
-        // start = clock();
-        // -------- add here ----------
-        // time_perfect += clock() - start;
-        // if (perfect_move == true_best_move) correct_prediction_perfect++;
+        start = clock();
+        int perfect_move  = minimax_prediction(current_test_board, 4);
+        if (perfect_move == true_best_move) 
+        correct_prediction_perfect++;
 
-        //Jane add your imperfect minimax logic, 80 train, 20 test
-        // start = clock();
-        // //variable = method
-        // time_imperfect += clock() - start;
-        // if (variableName == true_best_move) correct_prediction_imperfect++;
+        start = clock();
+        int imperfect_move   = minimax_prediction(current_test_board, 2);
+        if (imperfect_move == true_best_move) 
+        correct_prediction_imperfect++;
 
         // MODIFIED: Added spaces at the end to ensure the line is fully overwritten
         printf("Testing item %d / %d...  ", i + 1, test_size);
@@ -80,12 +91,13 @@ int main(void) {
     printf("\nEvaluation complete.\n");
     // 5. Calculate and display accuracy
     print_results("KNN",correct_prediction_knn,test_size,time_knn);
-    // print_results("Perfect",   correct_prediction_perfect,   test_size);
-    // print_results("Imperfect", correct_prediction_imperfect, test_size);
+    print_results("Perfect",  correct_prediction_perfect,  test_size,time_perfect);
+    print_results("Imperfect", correct_prediction_imperfect, test_size,time_imperfect);
     
-    
+    // 6. Run AI vs AI simulations (e.g. 200 games for each matchup)
+    simulate_matchups(train_set, train_size, 1000);
 
-    // 6. Clean up
+    // 7. Clean up
     free(all_data);
     printf("\nCleaned up memory. Program finished.\n");
 
@@ -105,7 +117,6 @@ void shuffle_dataset(DataPoint* dataset, int n) {
         }
     }
 }
-
 
 int predict_knn(DataPoint* train_set, int train_size, int new_board[9]) {
     Neighbor* neighbors = (Neighbor*)malloc(train_size * sizeof(Neighbor));
@@ -138,6 +149,88 @@ int predict_knn(DataPoint* train_set, int train_size, int new_board[9]) {
     return predicted_move;
 }
 
+// 0 = empty, 1 = X (AI), -1 = O (HUMAN) based on your CSV
+static char int_to_symbol(int v) {
+    if (v == 0)  return ' ';
+    if (v == 1)  return AI;     // 'X'
+    if (v == -1) return HUMAN;  // 'O'
+    return ' ';
+}
+
+// ⭐ This function ONLY returns the predicted move (1..9)
+int minimax_prediction(const int board9[9], int mode) {
+    char b[3][3];
+
+    // Convert 1D int[9] → 2D char[3][3] that aiTurn understands
+    for (int i = 0; i < 9; i++) {
+        int r = i / 3;
+        int c = i % 3;
+        b[r][c] = int_to_symbol(board9[i]);
+    }
+
+    // Call your existing AI (you changed it to return int)
+    int move = aiTurn(b, mode);   // mode 4 = perfect, 2 = imperfect
+    return move;                  // 1..9
+}
+
+// Map int cell to 'X'/'O'/' ' from the perspective of "player"
+// player: 1 = X, -1 = O
+static char int_to_symbol_for_player(int cell, int player) {
+    if (cell == 0) return ' ';
+
+    if (player == 1) { // X is current player
+        if (cell == 1)   return AI;    // me as 'X'
+        else             return HUMAN; // opponent as 'O'
+    } else {            // player == -1, O is current player
+        if (cell == -1)  return AI;    // me as 'X' in transformed board
+        else             return HUMAN; // opponent as 'O'
+    }
+}
+
+// Minimax for whichever side is to move: player = 1 (X) or -1 (O)
+int minimax_prediction_player(const int board9[9], int mode, int player) {
+    char b[3][3];
+
+    for (int i = 0; i < 9; i++) {
+        int r = i / 3;
+        int c = i % 3;
+        b[r][c] = int_to_symbol_for_player(board9[i], player);
+    }
+
+    int move = aiTurn(b, mode);  // same aiTurn as your 1P.c (returns 1..9)
+    return move;
+}
+
+// Check if given player (1 or -1) has 3 in a row on int[9] board
+int check_win_intboard(const int board9[9], int player) {
+    int p = player;
+
+    // rows
+    for (int r = 0; r < 3; r++) {
+        int i = r * 3;
+        if (board9[i] == p && board9[i+1] == p && board9[i+2] == p)
+            return 1;
+    }
+
+    // cols
+    for (int c = 0; c < 3; c++) {
+        if (board9[c] == p && board9[c+3] == p && board9[c+6] == p)
+            return 1;
+    }
+
+    // diagonals
+    if (board9[0] == p && board9[4] == p && board9[8] == p) return 1;
+    if (board9[2] == p && board9[4] == p && board9[6] == p) return 1;
+
+    return 0;
+}
+
+int board_full_int(const int board9[9]) {
+    for (int i = 0; i < 9; i++) {
+        if (board9[i] == 0) return 0;
+    }
+    return 1;
+}
 
 static void print_results(const char *label, int correct, int total,int time) {
     double accuracy = total ? (double)correct / total * 100.0 : 0.0;
@@ -146,6 +239,111 @@ static void print_results(const char *label, int correct, int total,int time) {
     printf("Total test items:    %d\n", total);
     printf("Correct predictions: %d\n", correct);
     printf("Model Accuracy:      %.2f%%\n", accuracy);
-    printf("Model Time Performance:      %.2f%%\n", time);
+    printf("Model Time Performance:  %.4f ms\n", time);
     printf("--------------------------\n");
 }
+int choose_move(PlayerType type, int current_player,
+                const int board9[9], DataPoint* train_set, int train_size) {
+    switch (type) {
+        case PLAYER_MINIMAX_PERFECT:
+            return minimax_prediction_player(board9, 4, current_player); // mode 4
+        case PLAYER_MINIMAX_IMPERFECT:
+            return minimax_prediction_player(board9, 2, current_player); // mode 2
+        case PLAYER_KNN:
+            // KNN takes int[9]; cast away const to match signature
+            return predict_knn(train_set, train_size, (int*)board9);
+        default:
+            return -1;
+    }
+}
+
+char simulate_game(PlayerType playerX, PlayerType playerO,
+                   DataPoint* train_set, int train_size) {
+    int board9[9] = {0};   // 0 = empty, 1 = X, -1 = O
+    int current = 1;       // start with X
+    int moves = 0;
+
+    while (1) {
+        PlayerType type = (current == 1) ? playerX : playerO;
+
+        int move = choose_move(type, current, board9, train_set, train_size);
+        if (move < 1 || move > 9) {
+            return 'E';
+        }
+
+        int idx = move - 1;
+        if (board9[idx] != 0) {
+            // tried to play on occupied cell → treat as error
+            return 'E';
+        }
+
+        board9[idx] = current;
+        moves++;
+
+        if (check_win_intboard(board9, current)) {
+            return (current == 1) ? 'X' : 'O';
+        }
+        if (board_full_int(board9)) {
+            return 'D';
+        }
+
+        current = -current;  // switch player
+    }
+}
+
+static void simulate_pair(const char *label,
+                          PlayerType A, PlayerType B,
+                          DataPoint *train_set, int train_size,
+                          int num_games)
+{
+    int half = num_games / 2;  // first half: A starts, second half: B starts
+    int a_wins = 0, b_wins = 0, draws = 0;
+    char result;
+
+    // --- First half: A = X, B = O ---
+    for (int g = 0; g < half; g++) {
+        result = simulate_game(A, B, train_set, train_size);
+        if (result == 'X')      a_wins++;  // X is A
+        else if (result == 'O') b_wins++;  // O is B
+        else if (result == 'D') draws++;
+    }
+
+    // --- Second half: B = X, A = O ---
+    for (int g = half; g < num_games; g++) {
+        result = simulate_game(B, A, train_set, train_size);
+        if (result == 'X')      b_wins++;  // X is B now
+        else if (result == 'O') a_wins++;  // O is A now
+        else if (result == 'D') draws++;
+    }
+
+    printf("\n=== %s ===\n", label);
+    printf("Total games: %d\n", num_games);
+    printf("A wins:      %d\n", a_wins);
+    printf("B wins:      %d\n", b_wins);
+    printf("Draws:       %d\n", draws);
+    printf("A win rate:  %.2f%%\n", num_games ? 100.0 * a_wins / num_games : 0.0);
+    printf("B win rate:  %.2f%%\n", num_games ? 100.0 * b_wins / num_games : 0.0);
+}
+
+
+void simulate_matchups(DataPoint* train_set, int train_size, int num_games) {
+    // Minimax (Perfect) vs Imperfect
+    simulate_pair("Minimax (Perfect) vs Imperfect  [A = Perfect, B = Imperfect]",
+                  PLAYER_MINIMAX_PERFECT,
+                  PLAYER_MINIMAX_IMPERFECT,
+                  train_set, train_size, num_games);
+
+    // KNN vs Imperfect
+    simulate_pair("KNN vs Imperfect  [A = KNN, B = Imperfect]",
+                  PLAYER_KNN,
+                  PLAYER_MINIMAX_IMPERFECT,
+                  train_set, train_size, num_games);
+
+    // Minimax (Perfect) vs KNN
+    simulate_pair("Minimax (Perfect) vs KNN  [A = Perfect, B = KNN]",
+                  PLAYER_MINIMAX_PERFECT,
+                  PLAYER_KNN,
+                  train_set, train_size, num_games);
+}
+
+

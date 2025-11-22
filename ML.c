@@ -3,10 +3,6 @@
 #include <stdio.h>
 #include <math.h>
 
-typedef struct {
-    double distance;
-    int best_move;
-} Neighbor;
 
 double dist9(const int a[9], const int b[9]) {
     double sum = 0.0;
