@@ -5,6 +5,7 @@
 #include <time.h>
 #include "ML.h"
 #include "1P.h"
+#include "2P.h"
 
 #define K 5
 #define MAX_LINE_LEN 1024
@@ -106,7 +107,6 @@ int main(void) {
 
 
 // --- Core KNN and Helper Functions (Unchanged) ---
-
 void shuffle_dataset(DataPoint* dataset, int n) {
     if (n > 1) {
         for (int i = n - 1; i > 0; i--) {
@@ -157,21 +157,26 @@ static char int_to_symbol(int v) {
     return ' ';
 }
 
-// ⭐ This function ONLY returns the predicted move (1..9)
-int minimax_prediction(const int board9[9], int mode) {
-    char b[3][3];
-
-    // Convert 1D int[9] → 2D char[3][3] that aiTurn understands
+static void int9_to_char33(const int board9[9], char b[3][3]) {
     for (int i = 0; i < 9; i++) {
         int r = i / 3;
         int c = i % 3;
-        b[r][c] = int_to_symbol(board9[i]);
+        if (board9[i] == 0)      b[r][c] = ' ';
+        else if (board9[i] == 1) b[r][c] = 'X';
+        else if (board9[i] == -1)b[r][c] = 'O';
     }
+}
 
-    // Call your existing AI (you changed it to return int)
+// This function ONLY returns the predicted move (1..9)
+int minimax_prediction(const int board9[9], int mode) {
+    char b[3][3];
+    // Convert 1D int[9] → 2D char[3][3] that aiTurn understands
+    int9_to_char33(board9, b);
+    // Call your existing AI of minimax based on mode 
     int move = aiTurn(b, mode);   // mode 4 = perfect, 2 = imperfect
     return move;                  // 1..9
 }
+
 
 // Map int cell to 'X'/'O'/' ' from the perspective of "player"
 // player: 1 = X, -1 = O
@@ -203,25 +208,17 @@ int minimax_prediction_player(const int board9[9], int mode, int player) {
 
 // Check if given player (1 or -1) has 3 in a row on int[9] board
 int check_win_intboard(const int board9[9], int player) {
-    int p = player;
+    char b[3][3];
+    int winLine[3] = {-1, -1, -1};
 
-    // rows
-    for (int r = 0; r < 3; r++) {
-        int i = r * 3;
-        if (board9[i] == p && board9[i+1] == p && board9[i+2] == p)
-            return 1;
-    }
+    // Convert int[9] -> char[3][3] using our adapter
+    int9_to_char33(board9, b);
 
-    // cols
-    for (int c = 0; c < 3; c++) {
-        if (board9[c] == p && board9[c+3] == p && board9[c+6] == p)
-            return 1;
-    }
+    // Use your existing 2P logic
+    char w = checkWin(b, winLine);   // returns 'X', 'O', or 0
 
-    // diagonals
-    if (board9[0] == p && board9[4] == p && board9[8] == p) return 1;
-    if (board9[2] == p && board9[4] == p && board9[6] == p) return 1;
-
+    if (player == 1 && w == 'X') return 1;   // X (1) wins
+    if (player == -1 && w == 'O') return 1;  // O (-1) wins
     return 0;
 }
 
@@ -242,20 +239,35 @@ static void print_results(const char *label, int correct, int total,int time) {
     printf("Model Time Performance:  %.4f ms\n", time);
     printf("--------------------------\n");
 }
+
 int choose_move(PlayerType type, int current_player,
                 const int board9[9], DataPoint* train_set, int train_size) {
     switch (type) {
         case PLAYER_MINIMAX_PERFECT:
-            return minimax_prediction_player(board9, 4, current_player); // mode 4
+            return minimax_prediction_player(board9, 4, current_player);
         case PLAYER_MINIMAX_IMPERFECT:
-            return minimax_prediction_player(board9, 2, current_player); // mode 2
-        case PLAYER_KNN:
-            // KNN takes int[9]; cast away const to match signature
-            return predict_knn(train_set, train_size, (int*)board9);
+            return minimax_prediction_player(board9, 2, current_player);
+        case PLAYER_KNN: {
+            int move = predict_knn(train_set, train_size, (int*)board9);
+            int idx  = move - 1;
+
+            // Fallback only for KNN
+            if (move < 1 || move > 9 || board9[idx] != 0) {
+                move = -1;
+                for (int i = 0; i < 9; i++) {
+                    if (board9[i] == 0) {
+                        move = i + 1;
+                        break;
+                    }
+                }
+            }
+            return move;
+        }
         default:
             return -1;
     }
 }
+
 
 char simulate_game(PlayerType playerX, PlayerType playerO,
                    DataPoint* train_set, int train_size) {
@@ -327,6 +339,24 @@ static void simulate_pair(const char *label,
 
 
 void simulate_matchups(DataPoint* train_set, int train_size, int num_games) {
+    // Minimax (Perfect) vs Minimax (Perfect)
+    simulate_pair("Minimax (Perfect) vs Minimax (Perfect)  [A = Perfect, B = Perfect]",
+                  PLAYER_MINIMAX_PERFECT,
+                  PLAYER_MINIMAX_PERFECT,
+                  train_set, train_size, num_games);
+
+    // Minimax (Perfect) vs Minimax (Perfect)
+    simulate_pair("Imperfect vs Imperfect  [A = Imperfect, B = Imperfect]",
+                  PLAYER_MINIMAX_IMPERFECT,
+                  PLAYER_MINIMAX_IMPERFECT,
+                  train_set, train_size, num_games);
+    
+    // Minimax (Perfect) vs Minimax (Perfect)
+    simulate_pair("KNN vs KNN  [A = KNN, B = KNN]",
+                  PLAYER_KNN,
+                  PLAYER_KNN,
+                  train_set, train_size, num_games);
+            
     // Minimax (Perfect) vs Imperfect
     simulate_pair("Minimax (Perfect) vs Imperfect  [A = Perfect, B = Imperfect]",
                   PLAYER_MINIMAX_PERFECT,
@@ -344,6 +374,7 @@ void simulate_matchups(DataPoint* train_set, int train_size, int num_games) {
                   PLAYER_MINIMAX_PERFECT,
                   PLAYER_KNN,
                   train_set, train_size, num_games);
+    
 }
 
 
