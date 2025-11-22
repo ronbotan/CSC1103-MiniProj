@@ -3,17 +3,13 @@
 #include <string.h>
 #include <math.h>
 #include <time.h>
+#include "ML.h"
 // #include <1P.h>
 
 #define K 5
 #define MAX_LINE_LEN 1024
 #define TRAIN_SPLIT 0.8
 
-// --- Data Structures ---
-typedef struct {
-    int board[9];
-    int best_move;
-} DataPoint;
 
 typedef struct {
     double distance;
@@ -21,7 +17,7 @@ typedef struct {
 } Neighbor;
 
 // --- Forward Declarations ---
-DataPoint* load_dataset(const char* filename, int* num_records);
+// DataPoint* knn_load_dataset(const char* filename, int* num_records);
 void shuffle_dataset(DataPoint* dataset, int n);
 int predict_knn(DataPoint* train_set, int train_size, int new_board[9]);
 static void print_results(const char *label, int correct, int total, int time);
@@ -33,7 +29,7 @@ int main(void) {
     // 1. Load the dataset
     int num_records = 0;
     printf("Loading dataset from 'bestmoves.csv'...\n");
-    DataPoint* all_data = load_dataset("bestmoves.csv", &num_records);
+    DataPoint* all_data = knn_load_dataset("KNN/bestmoves.csv", &num_records);
     if (all_data == NULL) return 1;
     printf("Dataset loaded with %d records.\n", num_records);
 
@@ -76,7 +72,6 @@ int main(void) {
         // time_imperfect += clock() - start;
         // if (variableName == true_best_move) correct_prediction_imperfect++;
 
-
         // MODIFIED: Added spaces at the end to ensure the line is fully overwritten
         printf("Testing item %d / %d...  ", i + 1, test_size);
         printf("\r"); // Move cursor to the start of the line
@@ -111,30 +106,17 @@ void shuffle_dataset(DataPoint* dataset, int n) {
     }
 }
 
-double euclidean_distance(int board1[9], int board2[9]) {
-    double sum_sq_diff = 0.0;
-    for (int i = 0; i < 9; i++) {
-        sum_sq_diff += pow(board1[i] - board2[i], 2);
-    }
-    return sqrt(sum_sq_diff);
-}
-
-int compare_neighbors(const void* a, const void* b) {
-    if (((Neighbor*)a)->distance < ((Neighbor*)b)->distance) return -1;
-    if (((Neighbor*)a)->distance > ((Neighbor*)b)->distance) return 1;
-    return 0;
-}
 
 int predict_knn(DataPoint* train_set, int train_size, int new_board[9]) {
     Neighbor* neighbors = (Neighbor*)malloc(train_size * sizeof(Neighbor));
     if (!neighbors) return -1;
 
     for (int i = 0; i < train_size; i++) {
-        neighbors[i].distance = euclidean_distance(new_board, train_set[i].board);
+        neighbors[i].distance = dist9(new_board, train_set[i].board);
         neighbors[i].best_move = train_set[i].best_move;
     }
 
-    qsort(neighbors, train_size, sizeof(Neighbor), compare_neighbors);
+    qsort(neighbors, train_size, sizeof(Neighbor), cmp_neighbors);
 
     int votes[10] = {0};
     for (int i = 0; i < K; i++) {
@@ -156,41 +138,6 @@ int predict_knn(DataPoint* train_set, int train_size, int new_board[9]) {
     return predicted_move;
 }
 
-DataPoint* load_dataset(const char* filename, int* num_records) {
-    FILE* file = fopen(filename, "r");
-    if (!file) {
-        perror("Error: Could not open dataset file");
-        return NULL;
-    }
-
-    char line[MAX_LINE_LEN];
-    int count = 0;
-    fgets(line, MAX_LINE_LEN, file);
-    while (fgets(line, MAX_LINE_LEN, file)) count++;
-    *num_records = count;
-
-    DataPoint* dataset = (DataPoint*)malloc(count * sizeof(DataPoint));
-    if (!dataset) {
-        perror("Failed to allocate memory for dataset");
-        fclose(file);
-        return NULL;
-    }
-
-    rewind(file);
-    fgets(line, MAX_LINE_LEN, file);
-    int i = 0;
-    while (fgets(line, MAX_LINE_LEN, file)) {
-        sscanf(line, "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d",
-            &dataset[i].board[0], &dataset[i].board[1], &dataset[i].board[2],
-            &dataset[i].board[3], &dataset[i].board[4], &dataset[i].board[5],
-            &dataset[i].board[6], &dataset[i].board[7], &dataset[i].board[8],
-            &dataset[i].best_move);
-        i++;
-    }
-
-    fclose(file);
-    return dataset;
-}
 
 static void print_results(const char *label, int correct, int total,int time) {
     double accuracy = total ? (double)correct / total * 100.0 : 0.0;

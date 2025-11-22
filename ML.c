@@ -8,7 +8,7 @@ typedef struct {
     int best_move;
 } Neighbor;
 
-static double dist9(const int a[9], const int b[9]) {
+double dist9(const int a[9], const int b[9]) {
     double sum = 0.0;
     for (int i = 0; i < 9; ++i) {
         double d = (double)a[i] - (double)b[i];
@@ -17,7 +17,7 @@ static double dist9(const int a[9], const int b[9]) {
     return sqrt(sum);
 }
 
-static int cmp_neighbors(const void* lhs, const void* rhs) {
+int cmp_neighbors(const void* lhs, const void* rhs) {
     double da = ((const Neighbor*)lhs)->distance;
     double db = ((const Neighbor*)rhs)->distance;
     if (da < db) return -1;
@@ -27,31 +27,31 @@ static int cmp_neighbors(const void* lhs, const void* rhs) {
 
 DataPoint* knn_load_dataset(const char* filename, int* out_count) {
     *out_count = 0;
-    FILE* fp = fopen(filename, "r");
-    if (!fp) {
-        perror("knn_load_dataset");
+    FILE* filepointer = fopen(filename, "r");
+    if (!filepointer) {
+        perror("Error: Could not open dataset file");
         return NULL;
     }
 
     char line[KNN_MAX_LINE];
-    fgets(line, sizeof line, fp);           // header
-    while (fgets(line, sizeof line, fp))
+    fgets(line, sizeof line, filepointer);           // header
+    while (fgets(line, sizeof line, filepointer))
         (*out_count)++;
 
     if (*out_count == 0) {
-        fclose(fp);
+        fclose(filepointer);
         return NULL;
     }
 
     DataPoint* data = malloc(*out_count * sizeof *data);
     if (!data) {
-        fclose(fp);
+        fclose(filepointer);
         return NULL;
     }
 
-    rewind(fp);
-    fgets(line, sizeof line, fp);
-    for (int i = 0; i < *out_count && fgets(line, sizeof line, fp); ++i) {
+    rewind(filepointer);
+    fgets(line, sizeof line, filepointer);
+    for (int i = 0; i < *out_count && fgets(line, sizeof line, filepointer); ++i) {
         sscanf(line,
                "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d",
                &data[i].board[0], &data[i].board[1], &data[i].board[2],
@@ -59,7 +59,7 @@ DataPoint* knn_load_dataset(const char* filename, int* out_count) {
                &data[i].board[6], &data[i].board[7], &data[i].board[8],
                &data[i].best_move);
     }
-    fclose(fp);
+    fclose(filepointer);
     return data;
 }
 
