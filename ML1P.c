@@ -2,7 +2,7 @@
 #include "ML.h"
 #include "gnuplot.h"        // reuse existing draw/init/check helpers
 #include "2P.h"             // for checkWin/checkFull if not in a header
-
+#include "1P.h"
 static void flatten_board(const char board[3][3], int out[9]) {
     for (int r = 0; r < 3; ++r)
         for (int c = 0; c < 3; ++c) {
@@ -42,20 +42,7 @@ char Run1PKnn(char board[3][3], const char* dataset_path) {
         draw(board, winner, winLine, title);
 
         if (player == 'O') {
-            int input;
-            printf("Player O, choose 1-9: ");
-            if (scanf("%d", &input) != 1 || input < 1 || input > 9) {
-                printf("Invalid input.\n");
-                while (getchar() != '\n');
-                continue;
-            }
-            int r = (input - 1) / 3;
-            int c = (input - 1) % 3;
-            if (board[r][c] != ' ') {
-                printf("Cell already taken.\n");
-                continue;
-            }
-            board[r][c] = 'O';
+            humanTurn(board);
         } else {
             int move = pick_knn_move(board, data, record_count);
             int r = (move - 1) / 3;
@@ -82,10 +69,13 @@ char Run1PKnn(char board[3][3], const char* dataset_path) {
             winner = player;
             if (winner == 'D') {
                 snprintf(title, sizeof title, "Tic-Tac-Toe - 1P - Draw");
+                printf("\n It's a Draw!\n");
             } else if (winner == 'O') {
                 snprintf(title, sizeof title, "Tic-Tac-Toe - 1P - Human wins!");
+                printf("\nHuman Wins!\n");  
             } else {
                 snprintf(title, sizeof title, "Tic-Tac-Toe - 1P - AI wins!");
+                printf("\nAI Wins!\n");  
             }
             draw(board, winner, winLine, title);
             break;
