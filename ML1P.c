@@ -61,7 +61,6 @@ char Run1PKnn(char board[3][3], const char* dataset_path) {
                 if (fallback != -1) move = fallback; // update the index we’ll report
             }
             board[r][c] = 'X';
-            snprintf(title, sizeof title, "Tic-Tac-Toe - 1P - AI moved");
             printf("AI plays %d\n", move);
         }
 
@@ -87,10 +86,6 @@ char Run1PKnn(char board[3][3], const char* dataset_path) {
             break;
         }
         player = (player == 'O') ? 'X' : 'O';
-        if (player == 'O')
-            snprintf(title, sizeof title, "Tic-Tac-Toe - 1P - Human's turn");
-        else
-            snprintf(title, sizeof title, "Tic-Tac-Toe - 1P - AI's turn");
     }
 
     close_gnuplot();

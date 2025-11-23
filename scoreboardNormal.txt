@@ -1,6 +1,6 @@
-AI NORMAL	6	5	20
+AI NORMAL	6	6	21
 charmain	4	2	10
-Charmain	2	3	6
+Charmain	2	4	7
 Ron	2	0	2
 j	1	0	1
 charmain\	0	0	1
