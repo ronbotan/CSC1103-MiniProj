@@ -3,9 +3,6 @@
 #include "1P.h"
 #include "2P.h"
 
-#define HUMAN 'O'
-#define AI 'X'
-
 // 1 Player Mode 
 // Difficulty = 2 --> Easy (HUman must win) 
 // Difficulty = 4 --> Hard (HUman must lose)
@@ -103,8 +100,7 @@ char Run1P(char board[3][3], char* boardPtr, int difficulty)
     else {
         return 'D';           
     }     
-    
-    
+      
 }
 
 // Recursively tries all possible moves for AI and human
@@ -290,7 +286,7 @@ int aiTurn(char b[3][3], int mode) {
                     char temp = b[r][c];
                     b[r][c] = AI;
                     int result = minimaxLogic(b, 0);         // Evaluate move result using minimax
-                    b[r][c] = temp;
+                    b[r][c] = ' ';
                                                            
                     if (result == 1) {  
                         bestRow = r; bestCol = c;             // Pick the one that Human will win
@@ -328,6 +324,7 @@ int aiTurn(char b[3][3], int mode) {
     // Place AI symbol in the chosen spot
     b[bestRow][bestCol] = AI;
 
+    // Uses for ml_analytics
     int moveIndex = bestRow * 3 + bestCol + 1;
     return moveIndex;
 }
