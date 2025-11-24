@@ -66,13 +66,10 @@ char Run1PKnn(char board[3][3], const char* dataset_path) {
 
         if (checkWin(board, winLine)) {
             winner = player;
-            if (winner == 'D') {
-                snprintf(title, sizeof title, "Tic-Tac-Toe - 1P - Draw");
-                printf("\n It's a Draw!\n");
-            } else if (winner == 'O') {
+            if (winner == 'O') {
                 snprintf(title, sizeof title, "Tic-Tac-Toe - 1P - Human wins!");
                 printf("\nHuman Wins!\n");  
-            } else {
+            }else {
                 snprintf(title, sizeof title, "Tic-Tac-Toe - 1P - AI wins!");
                 printf("\nAI Wins!\n");  
             }
@@ -82,6 +79,7 @@ char Run1PKnn(char board[3][3], const char* dataset_path) {
         if (checkFull(&board[0][0])) {
             winner = 'D';
             snprintf(title, sizeof title, "Tic-Tac-Toe - 1P - Draw");
+            printf("\n It's a Draw!\n");
             draw(board, winner, winLine, title);
             break;
         }

@@ -42,7 +42,7 @@ void close_gnuplot(void)
 // draw out my gnuplot
 void draw(char board[3][3], char winner, int winLine[3], const char *title)
 {
-
+    if (!gp) return;
      // send title to gnuplot
     if (title && title[0]) {
         fprintf(gp, "set title \"%s\" font \"Arial,12\"\n", title);
@@ -50,7 +50,6 @@ void draw(char board[3][3], char winner, int winLine[3], const char *title)
         fprintf(gp, "set title \"\"\n");
     }
 
-    if (!gp) return;
     fprintf(gp, "unset object\n");
     fprintf(gp, "unset arrow\n");
     fprintf(gp, "unset label\n");
