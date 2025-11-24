@@ -19,11 +19,10 @@ int main()
     // Storing of values in a char array
     char player = 'O'; // Initialise first player as O
     int row, col, result = 0;
-    char winner, loser;
+    char winner, loser, play;
 
     startLoop:
     int mode = 0;              // Assign mode to 0 after start loop. Ensures that mode is not a valid option on restart
-    char play = ' ';
     char board[ROW][COLUMN] = {// Reinitialise board
                                {' ', ' ', ' '},
                                {' ', ' ', ' '},
@@ -41,21 +40,23 @@ int main()
         printf("%-10s | %-10s\n", "6:", "Exit");
         printf("Selection: ");
         scanf("%d", &mode);
-        getchar(); // Clearing of input buffer
-        /* code */
+        getchar(); // Clear input buffer
     } while ((mode < 1) || (mode > 6));
 
     switch (mode) {
     case (1): // Run 2 player mode
-        if (play == '1') 
-            swapRoles(player1, player2);
+        if (play == '1') {
+            swapRoles(player1, player2); //Swap roles if player chooses to play again
+            printf("\nPlayer %s will go first this time!", player1);
+        }
+            
 
         else {
             readName(player1, 'O'); // Read name for player 1
             readName(player2, 'X'); // Read name for player 2
         }
 
-        winner = Run2P(board, boardPtr, player);                        // Run 2 player game and return the winner as X or O
+        winner = Run2P(board, boardPtr, player, player1, player2); // Run 2 player game and return the winner as X or O
         updateScores(winner, player1, player2, LABEL_2P, scoreboard2P); // Update the scoreboard for the winner. O = P1, X = P2, D = DRAW
         break;
 
