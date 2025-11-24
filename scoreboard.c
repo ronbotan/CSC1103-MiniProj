@@ -1,12 +1,11 @@
 #include <stdio.h>
 #include <string.h>
-#include <wchar.h>
 
 #define MAXPLAYERS 10
 
 // Create a structure to link the score to player names
 // Typedef struct Players stored to the Players to make it easier to access the structure variables in functions 
-typedef struct Players{
+typedef struct PlayerInfo{
     char name[50];
     int win;
     int draw;
@@ -16,9 +15,9 @@ typedef struct Players{
 void readName(char player[], char p);
 void trim(char *str);
 void showScores(char label[], char scoreboard[]);
-void updateDraw(char *player1, char *player2, char scoreboard[]);
-void updateLoserScore(char *loserName, char scoreboard[]);
-void updateWinnerScore(char *winnerName, char scoreboard[]);
+void updateDraw(char player1[], char player2[], char scoreboard[]);
+void updateLoserScore(char loserName[], char scoreboard[]);
+void updateWinnerScore(char winnerName[], char scoreboard[]);
 void saveScores(Players players[], int count, char scoreboard[]);
 int readScores(Players players[], int maxPlayers, char scoreboard[]);
 void updateScores(char winner, char player1[], char player2[], char label[], char scoreboard[]);
@@ -26,19 +25,15 @@ void swapRoles(char player1[], char player2[]);
 
 void readName(char player[], char p) {
     printf("\nEnter name for Player %c: ", p);
-    /*
-     * We cannot determine the caller's buffer size from here (parameter decays to pointer),
-     * so read up to 49 characters which matches Players.name size and conventions used elsewhere.
-     */
-    fgets(player, 50, stdin); /* read up to 49 chars + NUL */
-    trim(player); /* remove trailing newline/CR and trailing spaces */
+    fgets(player, 31, stdin); //Name of user can vary. We set the buffer space to 30 characters + 1 terminating null for flexibility
+    trim(player); //Calling of trim function to remove empty spaces and newline character (\n) 
 }
 
 void trim(char *str) {
-    // Remove trailing newline
+    //Removing of newline character picked up by fgets
     str[strcspn(str, "\n")] = '\0';
 
-    // Remove trailing spaces
+    //Removing of empty spaces at the end
     for (int i = strlen(str) - 1; i >= 0 && str[i] == ' '; i--)
         str[i] = '\0';
 }
@@ -82,19 +77,19 @@ void updateScores(char winner, char player1[], char player2[], char label[], cha
 }
 
 
-// Load scores into an array of Player structs
+//Load scores into an array of Player structs
 int readScores(Players players[], int maxPlayers, char scoreboard[]) {
     FILE *fp = fopen(scoreboard, "r");
-    if (fp == NULL) // No file of this name, break out
+    if (fp == NULL) //No file of this name, break out
         return 0;
 
     int count = 0;
     char line[256];
     while (count < maxPlayers && fgets(line, sizeof(line), fp)) {
-        // Expect file lines as tab-separated: name\twin\tdraw\tplayed
-        // Name may contain spaces; we read up to 49 chars stopping at a tab.
+        //Expect file lines as tab-separated: name\twin\tdraw\tplayed
+        //Name may contain spaces; we read up to 30 chars stopping at a tab.
         int w, d, p;
-        if (sscanf(line, "%49[^\t]\t%d\t%d\t%d", players[count].name, &w, &d, &p) == 4) {
+        if (sscanf(line, "%30[^\t]\t%d\t%d\t%d", players[count].name, &w, &d, &p) == 4) {
             players[count].win = w;
             players[count].draw = d;
             players[count].played = p;
@@ -106,7 +101,7 @@ int readScores(Players players[], int maxPlayers, char scoreboard[]) {
     return count;
 }
 
-// Write all players back to file
+//Write all players back to file
 void saveScores(Players players[], int count, char scoreboard[]) {
     sortWins(players, count);
 
@@ -116,7 +111,7 @@ void saveScores(Players players[], int count, char scoreboard[]) {
         return;
     }
     for (int i = 0; i < count; i++) {
-        // write as tab-separated so names can contain spaces
+        //Write as tab-separated texts so names can have spaces
         fprintf(fp, "%s\t%d\t%d\t%d\n",
             players[i].name,
             players[i].win,
@@ -126,8 +121,8 @@ void saveScores(Players players[], int count, char scoreboard[]) {
     fclose(fp);
 }
 
-// Update or add a player’s score
-void updateWinnerScore(char *winnerName, char scoreboard[]) {
+//Update or add a player’s score
+void updateWinnerScore(char winnerName[], char scoreboard[]) {
     Players players[MAXPLAYERS];
     int count = readScores(players, MAXPLAYERS, scoreboard);
 
@@ -140,7 +135,7 @@ void updateWinnerScore(char *winnerName, char scoreboard[]) {
         }
     }
 
-    // Add new player
+    //Add new player
     strcpy(players[count].name, winnerName);
     players[count].win = 1;
     players[count].draw = 0;
@@ -149,7 +144,7 @@ void updateWinnerScore(char *winnerName, char scoreboard[]) {
     saveScores(players, count, scoreboard);
 }
 
-void updateLoserScore(char *loserName, char scoreboard[]) {
+void updateLoserScore(char loserName[], char scoreboard[]) {
     Players players[MAXPLAYERS];
     int count = readScores(players, MAXPLAYERS, scoreboard);
 
@@ -170,7 +165,7 @@ void updateLoserScore(char *loserName, char scoreboard[]) {
     saveScores(players, count, scoreboard);
 }
 
-void updateDraw(char *player1, char *player2, char scoreboard[]) {
+void updateDraw(char player1[], char player2[], char scoreboard[]) {
     Players players[MAXPLAYERS];
     int count = readScores(players, MAXPLAYERS, scoreboard);
     int found1 = 0, found2 = 0;
@@ -186,7 +181,6 @@ void updateDraw(char *player1, char *player2, char scoreboard[]) {
             found2 = 1;
         }
     }
-
     if (!found1) {
         strcpy(players[count].name, player1);
         players[count].win = 0;
@@ -194,7 +188,6 @@ void updateDraw(char *player1, char *player2, char scoreboard[]) {
         players[count].played = 1;
         count++;
     }
-
     if (!found2) {
         strcpy(players[count].name, player2);
         players[count].win = 0;
@@ -202,7 +195,6 @@ void updateDraw(char *player1, char *player2, char scoreboard[]) {
         players[count].played = 1;
         count++;
     }
-
     saveScores(players, count, scoreboard);
 }
 

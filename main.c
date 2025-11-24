@@ -15,7 +15,7 @@
 
 int main()
 {
-    static char player1[20], player2[20];
+    static char player1[30], player2[30];
     // Storing of values in a char array
     char player = 'O'; // Initialise first player as O
     int row, col, result = 0;
@@ -49,8 +49,6 @@ int main()
             swapRoles(player1, player2); //Swap roles if player chooses to play again
             printf("\nPlayer %s will go first this time!", player1);
         }
-            
-
         else {
             readName(player1, 'O'); // Read name for player 1
             readName(player2, 'X'); // Read name for player 2
@@ -60,33 +58,32 @@ int main()
         updateScores(winner, player1, player2, LABEL_2P, scoreboard2P); // Update the scoreboard for the winner. O = P1, X = P2, D = DRAW
         break;
 
-    case (2): // Run 1 player easy mode (MiniMax)
+    case (2): //Run 1 player easy mode (MiniMax)
         readName(player1, 'O');
         winner = Run1P(board, boardPtr, 2);
         updateScores(winner, player1, "AI EASY", LABEL_EASY, scoreboardEasy);
         break;
 
-    case (3): // Run 1 player normal mode (ML Algorithm)
+    case (3): //Run 1 player normal mode (ML Algorithm)
         readName(player1, 'O');
         winner = Run1PKnn(board, "KNN/bestmoves.csv");
         updateScores(winner, player1, "AI NORMAL", LABEL_NORMAL, scoreboardNormal);
         break;
 
-    case (4): // Run 1 player hard mode (MiniMax)
+    case (4): //Run 1 player hard mode (MiniMax)
         readName(player1, 'O');
         winner = Run1P(board, boardPtr, 4);
         updateScores(winner, player1, "AI HARD", LABEL_HARD, scoreboardHard);
         break;
 
-    case (5):
-        printf("\n ----1 Player Scoreboard----");
+    case (5): //View scoreboards
         showScores(LABEL_EASY, scoreboardEasy);
         showScores(LABEL_NORMAL, scoreboardNormal);
         showScores(LABEL_HARD, scoreboardHard);
         showScores(LABEL_2P, scoreboard2P);
         goto startLoop;
 
-    case(6):
+    case(6): //Exit
         printf("\nGoodbye!\n");
         return 0;
     
