@@ -5,7 +5,7 @@
 #define COLUMN 3
 
 //Pass by value, 2D Array values passed from main to sub-function to check for winners
-int checkWin(char b[ROW][COLUMN], int winline[3]) {
+char checkWin(char b[ROW][COLUMN], int winline[3]) {
     for (int r = 0; r < 3; r++) {
         if (b[r][0] != ' ' && ((b[r][0] == b[r][1]) && (b[r][1] == b[r][2]))) {
             //If the condition fits, assign the winner using the value inside
@@ -31,26 +31,29 @@ int checkWin(char b[ROW][COLUMN], int winline[3]) {
         }
     }
 
-    // Check topleft to bottomright diagonal
-    if (b[1][1] != ' ' && ((b[0][0] == b[1][1]) && (b[1][1] == b[2][2]))) {
-        //If the condition fits, assign the winner using the value inside
-        winner = b[1][1];
-        //Assign the box number for winline. Used for draw function
-        winline[0] = 0;
-        winline[1] = 4;
-        winline[2] = 8;
-        return winner;
-    }
-
-    // Check topright to bottomleft diagonal
-    if (b[1][1] != ' ' && ((b[0][2] == b[1][1]) && (b[1][1] == b[2][0]))) {
-        //If the condition fits, assign the winner using the value inside
-        winner = b[1][1];
-        //Assign the box number for winline. Used for draw function
-        winline[0] = 2; 
-        winline[1] = 4; 
-        winline[2] = 6;
-        return winner;
+    //If center is not blank
+    if (b[1][1] != ' ') {
+        // Check topleft to bottomright diagonal
+        if( (b[0][0] == b[1][1]) && (b[1][1] == b[2][2])) {
+            //If the condition fits, assign the winner using the value inside
+            winner = b[1][1];
+            //Assign the box number for winline. Used for draw function
+            winline[0] = 0;
+            winline[1] = 4;
+            winline[2] = 8;
+            return winner;
+        }
+        // Check topright to bottomleft diagonal
+        else if ((b[0][2] == b[1][1]) && (b[1][1] == b[2][0]))
+        {
+            //If the condition fits, assign the winner using the value inside
+            winner = b[1][1];
+            //Assign the box number for winline. Used for draw function
+            winline[0] = 2; 
+            winline[1] = 4; 
+            winline[2] = 6;
+            return winner;
+        }
     }
     return 0;
 }
@@ -64,7 +67,7 @@ int checkFull(char* charPtr) {
 }
 
 //2 Player Game to be run in main
-char Run2P(char board[][3], char* boardPtr, char player){
+char Run2P(char board[][3], char* boardPtr, char player, char player1[], char player2[]){
     char winner, loser;
     int input, row, col, result;
     int move_number = 1;
@@ -80,7 +83,10 @@ char Run2P(char board[][3], char* boardPtr, char player){
         char title[120];
         snprintf(title, sizeof title, "Tic-Tac-Toe - 2P - Player %c's turn - Move %d", player, move_number);
         draw(board, winner, winLine, title); //Call Draw function from GUI
-        printf("\nPlayer %c, select a box (1-9): ", player);
+        if(player == 'O')
+            printf("\n%s (%c), select a box (1-9): ", player1, player);
+        else
+            printf("\n%s (%c), select a box (1-9): ", player2, player);
         
         if (scanf("%d", &input) != 1 || input < 1 || input > 9) {    
             printf("Invalid input! Please enter a number between 1 and 9.\n");

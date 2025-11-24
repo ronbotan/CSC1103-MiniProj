@@ -18,13 +18,39 @@ void trim(char *str);
 void showScores(char label[], char scoreboard[]);
 void updateDraw(char *player1, char *player2, char scoreboard[]);
 void updateLoserScore(char *loserName, char scoreboard[]);
-void updatePlayerScore(char *winnerName, char scoreboard[]);
+void updateWinnerScore(char *winnerName, char scoreboard[]);
 void saveScores(Players players[], int count, char scoreboard[]);
 int readScores(Players players[], int maxPlayers, char scoreboard[]);
 void updateScores(char winner, char player1[], char player2[], char label[], char scoreboard[]);
 void swapRoles(char player1[], char player2[]);
 
-static void sort_by_wins_desc(Players players[], int count) {
+void readName(char player[], char p) {
+    printf("\nEnter name for Player %c: ", p);
+    /*
+     * We cannot determine the caller's buffer size from here (parameter decays to pointer),
+     * so read up to 49 characters which matches Players.name size and conventions used elsewhere.
+     */
+    fgets(player, 50, stdin); /* read up to 49 chars + NUL */
+    trim(player); /* remove trailing newline/CR and trailing spaces */
+}
+
+void trim(char *str) {
+    // Remove trailing newline
+    str[strcspn(str, "\n")] = '\0';
+
+    // Remove trailing spaces
+    for (int i = strlen(str) - 1; i >= 0 && str[i] == ' '; i--)
+        str[i] = '\0';
+}
+
+void swapRoles(char player1[], char player2[]) {
+    char temp[50]; //Temporary array to hold player 1 (support longer names)
+    strcpy(temp, player1); //Store player 1 into a tempArray
+    strcpy(player1, player2); //Move player 2 to player 1 position
+    strcpy(player2, temp); //Move tempArray (player 1) to player 2
+}
+
+static void sortWins(Players players[], int count) {
     for (int i = 0; i < count - 1; ++i) {
         int best = i;
         for (int j = i + 1; j < count; ++j) {
@@ -42,11 +68,11 @@ static void sort_by_wins_desc(Players players[], int count) {
 
 void updateScores(char winner, char player1[], char player2[], char label[], char scoreboard[]) {
     if (winner == 'O') { //Player 1 win
-        updatePlayerScore(player1, scoreboard);
+        updateWinnerScore(player1, scoreboard);
         updateLoserScore(player2, scoreboard);
     }
     else if (winner == 'X') {//Player 2 win
-        updatePlayerScore(player2, scoreboard);
+        updateWinnerScore(player2, scoreboard);
         updateLoserScore(player1, scoreboard);
     }
     else if (winner == 'D') { //DRAW
@@ -75,7 +101,6 @@ int readScores(Players players[], int maxPlayers, char scoreboard[]) {
             trim(players[count].name);
             count++;
         }
-        // Lines that do not match the tab-separated format are ignored.
     }
     fclose(fp);
     return count;
@@ -83,7 +108,7 @@ int readScores(Players players[], int maxPlayers, char scoreboard[]) {
 
 // Write all players back to file
 void saveScores(Players players[], int count, char scoreboard[]) {
-    sort_by_wins_desc(players, count);
+    sortWins(players, count);
 
     FILE *fp = fopen(scoreboard, "w");
     if (fp == NULL) {
@@ -102,7 +127,7 @@ void saveScores(Players players[], int count, char scoreboard[]) {
 }
 
 // Update or add a player’s score
-void updatePlayerScore(char *winnerName, char scoreboard[]) {
+void updateWinnerScore(char *winnerName, char scoreboard[]) {
     Players players[MAXPLAYERS];
     int count = readScores(players, MAXPLAYERS, scoreboard);
 
@@ -198,28 +223,3 @@ void showScores(char label[], char scoreboard[]) {
     printf("\n");
 }
 
-void trim(char *str) {
-    // Remove trailing newline
-    str[strcspn(str, "\r\n")] = '\0';
-
-    // Remove trailing spaces
-    for (int i = strlen(str) - 1; i >= 0 && str[i] == ' '; i--)
-        str[i] = '\0';
-}
-
-void readName(char player[], char p) {
-    printf("\nEnter name for Player %c: ", p);
-    /*
-     * We cannot determine the caller's buffer size from here (parameter decays to pointer),
-     * so read up to 49 characters which matches Players.name size and conventions used elsewhere.
-     */
-    fgets(player, 50, stdin); /* read up to 49 chars + NUL */
-    trim(player); /* remove trailing newline/CR and trailing spaces */
-}
-
-void swapRoles(char player1[], char player2[]) {
-    char temp[50]; //Temporary array to hold player 1 (support longer names)
-    strcpy(temp, player1); //Store player 1 into a tempArray
-    strcpy(player1, player2); //Move player 2 to player 1 position
-    strcpy(player2, temp); //Move tempArray (player 1) to player 2
-}
