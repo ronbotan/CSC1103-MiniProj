@@ -1,5 +1,5 @@
-AI HARD	10	7	17
-Ron	0	3	9
+AI HARD	10	8	18
+Ron	0	4	10
 Ron Tan	0	1	2
 j	0	2	3
 charmain	0	1	1

@@ -45,7 +45,7 @@ int main()
 
     switch (mode) {
     case (1): // Run 2 player mode
-        if (play == '1') {
+        if ((play == '1') && (player2[0] != '\0')) {
             swapRoles(player1, player2); //Swap roles if player chooses to play again
             printf("\nPlayer %s will go first this time!", player1);
         }
