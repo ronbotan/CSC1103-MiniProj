@@ -20,7 +20,6 @@ typedef enum {
 // --- Forward Declarations ---
 // DataPoint* knn_load_dataset(const char* filename, int* num_records);
 void shuffle_dataset(DataPoint* dataset, int n);
-int predict_knn(DataPoint* train_set, int train_size, int new_board[9]);
 int minimax_prediction(const int board9[9], int mode);
 static void print_results(const char *label, int correct, int total);
 
@@ -66,11 +65,10 @@ int main(void) {
         int* current_test_board = test_set[i].board;
         int true_best_move = test_set[i].best_move;
 
-        int knn_move = predict_knn(train_set, train_size, current_test_board);
+        int knn_move = knn_predict_move(train_set, train_size, current_test_board);
         if (knn_move == true_best_move) 
         correct_prediction_knn++;
 
-        //Jane add your minimax logic, 80 train, 20 test
         int perfect_move  = minimax_prediction(current_test_board, 4);
         if (perfect_move == true_best_move) 
         correct_prediction_perfect++;
@@ -114,36 +112,7 @@ void shuffle_dataset(DataPoint* dataset, int n) {
     }
 }
 
-int predict_knn(DataPoint* train_set, int train_size, int new_board[9]) {
-    Neighbor* neighbors = (Neighbor*)malloc(train_size * sizeof(Neighbor));
-    if (!neighbors) return -1;
 
-    for (int i = 0; i < train_size; i++) {
-        neighbors[i].distance = dist9(new_board, train_set[i].board);
-        neighbors[i].best_move = train_set[i].best_move;
-    }
-
-    qsort(neighbors, train_size, sizeof(Neighbor), cmp_neighbors);
-
-    int votes[10] = {0};
-    for (int i = 0; i < K; i++) {
-        if (i < train_size) {
-            votes[neighbors[i].best_move]++;
-        }
-    }
-
-    int max_votes = -1;
-    int predicted_move = -1;
-    for (int i = 1; i <= 9; i++) {
-        if (votes[i] > max_votes) {
-            max_votes = votes[i];
-            predicted_move = i;
-        }
-    }
-
-    free(neighbors);
-    return predicted_move;
-}
 
 // 0 = empty, 1 = X (AI), -1 = O (HUMAN) based on your CSV
 static char int_to_symbol(int v) {
@@ -242,7 +211,7 @@ int choose_move(PlayerType type, int current_player,
         case PLAYER_MINIMAX_IMPERFECT:
             return minimax_prediction_player(board9, 2, current_player);
         case PLAYER_KNN: {
-            int move = predict_knn(train_set, train_size, (int*)board9);
+            int move = knn_predict_move(train_set, train_size, (int*)board9);
             int idx  = move - 1;
 
             // Fallback only for KNN
@@ -261,7 +230,6 @@ int choose_move(PlayerType type, int current_player,
             return -1;
     }
 }
-
 
 char simulate_game(PlayerType playerX, PlayerType playerO,
                    DataPoint* train_set, int train_size) {
