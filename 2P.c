@@ -1,5 +1,6 @@
 #include "gnuplot.h"
 #include <stdio.h>
+#include <time.h>
 
 #define ROW 3
 #define COLUMN 3
@@ -83,6 +84,7 @@ char Run2P(char board[][3], char* boardPtr, char player, char player1[], char pl
         char title[120];
         snprintf(title, sizeof title, "Tic-Tac-Toe - 2P - Player %c's turn - Move %d", player, move_number);
         draw(board, winner, winLine, title); //Call Draw function from GUI
+        clock_t start = clock();
         if(player == 'O')
             printf("\n%s (%c), select a box (1-9): ", player1, player);
         else
@@ -106,6 +108,9 @@ char Run2P(char board[][3], char* boardPtr, char player, char player1[], char pl
 
         // Make move
         board[row][col] = player;
+        clock_t end = clock();
+        double time_spent = 1000.0*(end - start) / CLOCKS_PER_SEC;
+        printf("Player %c turn time: %.2f ms\n", player, time_spent);
         snprintf(title, sizeof title, "Tic-Tac-Toe - 2P - Player %c moved - Move %d", player, move_number);
         draw(board, winner, winLine, title);
 

@@ -2,6 +2,7 @@
 #include "gnuplot.h"
 #include "1P.h"
 #include "2P.h"
+#include <time.h>
 
 // 1 Player Mode 
 // Difficulty = 2 --> Easy (HUman must win) 
@@ -35,10 +36,12 @@ char Run1P(char board[3][3], char* boardPtr, int difficulty)
     draw(board, winner, winLine, title);     // initial board
 
     while (1) {
-
+        clock_t start = clock();
         // Human Move
         humanTurn(board);
-
+        clock_t end = clock();
+        double time_spent = 1000.0*(end - start) / CLOCKS_PER_SEC;
+        printf("Human turn time: %.2f ms\n", time_spent);
         result = checkWin(board, winLine);           // Check if human moved 3 in a row
 
         if (result == HUMAN) {                       
@@ -59,7 +62,11 @@ char Run1P(char board[3][3], char* boardPtr, int difficulty)
 
 
         // AI Move
-        aiTurn(board, difficulty);            
+        clock_t ai_start = clock();
+        aiTurn(board, difficulty);
+        clock_t ai_end = clock();
+        double ai_time_spent = 1000.0*(ai_end - ai_start) / CLOCKS_PER_SEC;
+        printf("AI turn time: %.2f ms\n", ai_time_spent);            
 
         result = checkWin(board, winLine);    // Check if AI move 3 in a row
 

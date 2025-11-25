@@ -3,6 +3,7 @@
 #include "gnuplot.h"        // reuse existing draw/init/check helpers
 #include "2P.h"             // for checkWin/checkFull if not in a header
 #include "1P.h"
+#include <time.h>   // add with the other includes
 static void flatten_board(const char board[3][3], int out[9]) {
     for (int r = 0; r < 3; ++r)
         for (int c = 0; c < 3; ++c) {
@@ -40,7 +41,7 @@ char Run1PKnn(char board[3][3], const char* dataset_path) {
     snprintf(title, sizeof title, "Tic-Tac-Toe - 1P - Human's turn");
     while (1) {
         draw(board, winner, winLine, title);
-
+        clock_t start = clock();
         if (player == 'O') {
             humanTurn(board);
         } else {
@@ -63,7 +64,12 @@ char Run1PKnn(char board[3][3], const char* dataset_path) {
             board[r][c] = 'X';
             printf("AI plays %d\n", move);
         }
-
+        clock_t end = clock();
+        double time_spent = 1000.0*(end - start) / CLOCKS_PER_SEC;
+        if (player == 'O')
+            printf("Human turn time: %.2f ms\n", time_spent);
+        else
+            printf("AI turn time: %.2f ms\n", time_spent);
         if (checkWin(board, winLine)) {
             winner = player;
             if (winner == 'O') {
