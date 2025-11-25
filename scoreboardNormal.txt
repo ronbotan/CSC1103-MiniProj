@@ -1,0 +1,5 @@
+AI NORMAL	6	7	23
+charmain	4	2	10
+Ron	3	1	4
+Charmain	2	4	7
+j	1	0	1

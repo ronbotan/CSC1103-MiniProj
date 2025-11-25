@@ -34,7 +34,7 @@ char checkWin(char b[ROW][COLUMN], int winline[3]) {
     //If center is not blank
     if (b[1][1] != ' ') {
         // Check topleft to bottomright diagonal
-        if( (b[0][0] == b[1][1]) && (b[1][1] == b[2][2])) {
+        if((b[0][0] == b[1][1]) && (b[1][1] == b[2][2])) {
             //If the condition fits, assign the winner using the value inside
             winner = b[1][1];
             //Assign the box number for winline. Used for draw function

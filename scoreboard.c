@@ -19,9 +19,9 @@ void updateDraw(char player1[], char player2[], char scoreboard[]);
 void updateLoserScore(char loserName[], char scoreboard[]);
 void updateWinnerScore(char winnerName[], char scoreboard[]);
 void saveScores(Players players[], int count, char scoreboard[]);
-int readScores(Players players[], int maxPlayers, char scoreboard[]);
 void updateScores(char winner, char player1[], char player2[], char label[], char scoreboard[]);
 void swapRoles(char player1[], char player2[]);
+int readScores(Players players[], int maxPlayers, char scoreboard[]);
 
 void readName(char player[], char p) {
     printf("\nEnter name for Player %c: ", p);
@@ -45,8 +45,8 @@ void swapRoles(char player1[], char player2[]) {
     strcpy(player2, temp); //Move tempArray (player 1) to player 2
 }
 
-static void sortWins(Players players[], int count) {
-    for (int i = 0; i < count - 1; ++i) {
+void sortWins(Players players[], int count) {
+    for (int i = 0; i < count - 1; i++) {
         int best = i;
         for (int j = i + 1; j < count; ++j) {
             if (players[j].win > players[best].win) {
