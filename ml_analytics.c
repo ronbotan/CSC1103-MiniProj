@@ -22,7 +22,7 @@ typedef enum {
 void shuffle_dataset(DataPoint* dataset, int n);
 int predict_knn(DataPoint* train_set, int train_size, int new_board[9]);
 int minimax_prediction(const int board9[9], int mode);
-static void print_results(const char *label, int correct, int total, int time);
+static void print_results(const char *label, int correct, int total);
 
 
 int minimax_prediction_player(const int board9[9], int mode, int player);
@@ -61,25 +61,21 @@ int main(void) {
     fflush(stdout); // <<-- ADDED: Flush buffer before starting the loop
 
     int correct_prediction_knn = 0, correct_prediction_perfect = 0, correct_prediction_imperfect = 0;
-    double time_knn = 0, time_perfect = 0, time_imperfect = 0;
 
     for (int i = 0; i < test_size; i++) {
         int* current_test_board = test_set[i].board;
         int true_best_move = test_set[i].best_move;
 
-        clock_t start = clock();
         int knn_move = predict_knn(train_set, train_size, current_test_board);
-        time_knn += clock() - start;
         if (knn_move == true_best_move) 
         correct_prediction_knn++;
 
         //Jane add your minimax logic, 80 train, 20 test
-        start = clock();
         int perfect_move  = minimax_prediction(current_test_board, 4);
         if (perfect_move == true_best_move) 
         correct_prediction_perfect++;
 
-        start = clock();
+        
         int imperfect_move   = minimax_prediction(current_test_board, 2);
         if (imperfect_move == true_best_move) 
         correct_prediction_imperfect++;
@@ -91,9 +87,9 @@ int main(void) {
     }
     printf("\nEvaluation complete.\n");
     // 5. Calculate and display accuracy
-    print_results("KNN",correct_prediction_knn,test_size,time_knn);
-    print_results("Perfect",  correct_prediction_perfect,  test_size,time_perfect);
-    print_results("Imperfect", correct_prediction_imperfect, test_size,time_imperfect);
+    print_results("KNN",correct_prediction_knn,test_size);
+    print_results("Perfect",  correct_prediction_perfect,  test_size);
+    print_results("Imperfect", correct_prediction_imperfect, test_size);
     
     // 6. Run AI vs AI simulations (e.g. 200 games for each matchup)
     simulate_matchups(train_set, train_size, 1000);
@@ -229,14 +225,12 @@ int board_full_int(const int board9[9]) {
     return 1;
 }
 
-static void print_results(const char *label, int correct, int total,int time) {
+static void print_results(const char *label, int correct, int total) {
     double accuracy = total ? (double)correct / total * 100.0 : 0.0;
-    double avg_ms = total ? (time / CLOCKS_PER_SEC) * 1000.0 / total : 0.0;
     printf("\n--- %s Evaluation ---\n", label);
     printf("Total test items:    %d\n", total);
     printf("Correct predictions: %d\n", correct);
     printf("Model Accuracy:      %.2f%%\n", accuracy);
-    printf("Model Time Performance:  %.4f ms\n", time);
     printf("--------------------------\n");
 }
 
@@ -374,7 +368,6 @@ void simulate_matchups(DataPoint* train_set, int train_size, int num_games) {
                   PLAYER_MINIMAX_PERFECT,
                   PLAYER_KNN,
                   train_set, train_size, num_games);
-    
 }
 
 
