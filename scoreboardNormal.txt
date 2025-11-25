@@ -1,3 +1,5 @@
 Ron	4	0	5
-AI NORMAL	3	0	7
+AI NORMAL	3	1	10
+charmain	2	0	2
+Charmain	0	1	1
 shaun	0	0	2

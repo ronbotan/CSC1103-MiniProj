@@ -39,7 +39,7 @@ DataPoint* knn_load_dataset(const char* filename, int* out_count) {
         return NULL;
     }
 
-    DataPoint* data = malloc(*out_count * sizeof *data);
+    DataPoint* data = calloc(*out_count,sizeof *data);
     if (!data) {
         fclose(filepointer);
         return NULL;
@@ -66,7 +66,7 @@ void knn_free_dataset(DataPoint* data) {
 int knn_predict_move(const DataPoint* data, int count, const int board[9]) {
     if (!data || count == 0) return -1;
 
-    Neighbor* buf = malloc(count * sizeof *buf);
+    Neighbor* buf = calloc(count,sizeof *buf);
     if (!buf) return -1;
 
     for (int i = 0; i < count; ++i) {
